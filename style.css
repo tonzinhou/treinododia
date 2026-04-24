@@ -1,189 +1,78 @@
-/* 1. RESET E ESTILOS GLOBAIS */
-* {
-    box-sizing: border-box;
-}
-
+/* 1. RESET E GLOBAIS */
+* { box-sizing: border-box; }
 body {
     background-color: #121212;
     color: white;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Roboto, sans-serif;
     margin: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
     min-height: 100vh;
 }
 
-/* 2. COMPONENTES COMUNS (INPUTS E SELECTS) */
-input, select {
-    padding: 12px;
-    border-radius: 5px;
-    border: 1px solid #333;
-    background: #1e1e1e;
-    color: white;
-    width: 100%;
-    font-size: 1rem;
-}
-
-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 20px;
-}
-
-.btn-principal {
-    padding: 12px;
-    background: #ffcc00;
-    color: #000;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s, background 0.3s;
-}
-
-.btn-principal:hover {
-    background: #e6b800;
-    transform: scale(1.02);
-}
-
-/* 3. TELA DE LOGIN (index.html) */
-.login-container {
-    width: 90%;
-    max-width: 350px;
-    text-align: center;
-}
-
-.tabs {
-    display: flex;
-    border-radius: 8px 8px 0 0;
-    overflow: hidden;
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    background: #252525;
-    color: #888;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.tab-btn.active {
-    background: #ffcc00;
-    color: #000;
-}
-
-.login-box {
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 0 0 8px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
-/* 4. CABEÇALHO DO ALUNO E PERFIL */
-.container-aluno {
-    width: 100%;
-    max-width: 500px;
-    padding: 20px;
-}
-
-.header-aluno {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 25px;
-}
-
-.perfil-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
+/* 2. CABEÇALHO E PERFIL */
+.container-aluno { width: 100%; max-width: 500px; padding: 20px; }
+.header-aluno { display: flex; justify-content: space-between; margin-bottom: 25px; }
+.perfil-info { display: flex; align-items: center; gap: 15px; }
 .foto-perfil img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 2px solid #ffcc00;
-    object-fit: cover;
-    box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+    width: 65px; height: 65px; border-radius: 50%;
+    border: 2px solid #ffcc00; object-fit: cover;
 }
+.texto-boas-vindas h2 { margin: 0; font-size: 1.3rem; }
+.frase-motivacional { font-size: 0.75rem; color: #888; font-style: italic; margin-top: 5px; }
 
-.texto-boas-vindas h2 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.frase-motivacional {
-    font-size: 0.75rem;
-    color: #888;
-    margin: 0;
-    font-style: italic;
-}
-
-.btn-sair {
-    background: #ff4444;
-    border: none;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
-
-/* 5. FILTRO DE TREINOS (A, B, C) */
-.filtro-treinos {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-}
-
-.filtro-treinos button {
-    flex: 1;
-    padding: 12px 5px;
-    background: #252525;
-    color: white;
-    border: 1px solid #ffcc00;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.filtro-treinos button.active {
+/* 3. CRONÔMETRO INLINE */
+.cronometro-inline {
+    display: none;
     background: #ffcc00;
-    color: black;
-    box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
-}
-
-/* 6. CARDS DE TREINO E GAVETA */
-.card-treino {
-    background: #1e1e1e;
-    border-left: 6px solid #ffcc00;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-.card-content {
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
+    color: #000;
+    padding: 5px 12px;
+    border-radius: 5px;
+    margin: 8px 0;
+    font-family: monospace;
+    font-size: 1.4rem;
+    font-weight: bold;
     align-items: center;
+    gap: 10px;
+    width: fit-content;
+}
+.cronometro-inline.visible { display: flex; }
+.btn-parar-timer {
+    background: #000; color: #fff; border: none;
+    border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 10px;
 }
 
-.card-treino h3 {
-    margin: 0;
-    text-transform: uppercase;
-    font-size: 1.1rem;
+/* 4. FILTROS A/B/C */
+.filtro-treinos { display: flex; gap: 8px; margin-bottom: 20px; }
+.filtro-treinos button {
+    flex: 1; padding: 12px; background: #252525; color: #fff;
+    border: 1px solid #ffcc00; border-radius: 8px; font-weight: bold; cursor: pointer;
+}
+.filtro-treinos button.active { background: #ffcc00; color: #000; }
+
+/* 5. CARDS DE TREINO */
+.card-treino {
+    background: #1e1e1e; border-left: 6px solid #ffcc00;
+    margin-bottom: 12px; border-radius: 10px; overflow: hidden;
+}
+.card-content { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.card-treino h3 { margin: 0; font-size: 1.1rem; text-transform: uppercase; }
+.btn-video {
+    background: transparent; color: #ffcc00; border: 1px solid #ffcc00;
+    padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; cursor: pointer;
+}
+
+/* 6. CARGA E VÍDEO */
+.input-carga {
+    width: 75px; background: #000; border: 1px solid #444; color: #ffcc00;
+    padding: 5px; text-align: center; border-radius: 4px; font-weight: bold;
+}
+.video-dropdown {
+    max-height: 0; overflow: hidden; transition: 0.4s ease-in-out; background: #000;
+    display: flex; justify-content: center;
+}
+.video-dropdown.open { max-height: 400px; padding: 10px 0; }
+.video-container { position: relative; width: 90%; padding-bottom: 56.25%; height: 0; }
+.video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+.btn-sair { background: #ff4444; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
