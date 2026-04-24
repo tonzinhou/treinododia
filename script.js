@@ -108,7 +108,7 @@ async function atribuirTreino() {
         aluno_id,
         exercicio: document.getElementById('exNome').value,
         series: parseInt(document.getElementById('exSeries').value),
-        reps: parseInt(document.getElementById('exReps').value),
+        reps: document.getElementById('exReps').value,
         descanso: parseInt(document.getElementById('exDescanso').value) || 60,
         video_url: document.getElementById('exVideo').value,
         letra_treino: document.getElementById('exLetra').value,
