@@ -12,7 +12,26 @@ const coresGrupos = {
     'Ombros': '#ff8800', 'Braços': '#ff44ff', 'Core': '#00ffff'
 };
 
-// 2. LÓGICA DE LOGIN (NICKNAME)
+// 2. LÓGICA DE LOGIN E ABA (GLOBAL)
+window.switchTab = function(tipo) {
+    abaAtual = tipo;
+    const btnAluno = document.getElementById('tab-aluno');
+    const btnAdmin = document.getElementById('tab-admin');
+    const titulo = document.getElementById('login-title');
+
+    if (btnAluno && btnAdmin) {
+        if (tipo === 'admin') {
+            btnAdmin.classList.add('active');
+            btnAluno.classList.remove('active');
+            if (titulo) titulo.innerText = 'Acesso Administrador';
+        } else {
+            btnAluno.classList.add('active');
+            btnAdmin.classList.remove('active');
+            if (titulo) titulo.innerText = 'Acesso Aluno';
+        }
+    }
+};
+
 async function fazerLogin() {
     const nickOuEmail = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
@@ -40,19 +59,6 @@ async function verificarPermissao(userId) {
     }
 }
 
-window.switchTab = function(tipo) {
-    abaAtual = tipo;
-    const btnAluno = document.getElementById('tab-aluno');
-    const btnAdmin = document.getElementById('tab-admin');
-    if (tipo === 'admin') {
-        btnAdmin.classList.add('active'); btnAluno.classList.remove('active');
-        document.getElementById('login-title').innerText = 'Acesso Administrador';
-    } else {
-        btnAluno.classList.add('active'); btnAdmin.classList.remove('active');
-        document.getElementById('login-title').innerText = 'Acesso Aluno';
-    }
-};
-
 // 3. FUNÇÕES DO ADMINISTRADOR
 async function cadastrarNovoAluno() {
     const nomeEl = document.getElementById('novoNome');
@@ -61,7 +67,7 @@ async function cadastrarNovoAluno() {
     const fotoEl = document.getElementById('novoFoto');
     const fraseEl = document.getElementById('novoFrase');
 
-    if (!nomeEl || !nickEl || !senhaEl) return alert("Campos obrigatórios não encontrados.");
+    if (!nomeEl || !nickEl || !senhaEl) return alert("Erro: Campos de cadastro não encontrados.");
 
     const nome = nomeEl.value;
     const nick = nickEl.value.trim().toLowerCase();
@@ -77,13 +83,12 @@ async function cadastrarNovoAluno() {
     if (error) return alert("Erro Auth: " + error.message);
 
     if (data.user) {
-        const { error: perfilError } = await supabaseClient.from('perfis').insert([{ 
+        await supabaseClient.from('perfis').insert([{ 
             id: data.user.id, nome, nickname: nick, role: 'usuario',
             foto_url: foto_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
             frase: frase || 'Foco na missão!'
         }]);
-        if (perfilError) return alert("Erro Perfil: " + perfilError.message);
-        alert(`Aluno ${nick} cadastrado!`);
+        alert(`Aluno ${nick} cadastrado com sucesso!`);
         carregarAlunos();
     }
 }
@@ -111,7 +116,7 @@ async function atribuirTreino() {
         letra_treino: document.getElementById('exLetra').value,
         grupo: document.getElementById('exGrupo').value
     }]);
-    if (error) alert(error.message); else alert("Adicionado!");
+    if (error) alert(error.message); else alert("Exercício adicionado!");
 }
 
 async function buscarTreinosParaEdicao() {
@@ -131,91 +136,4 @@ async function buscarTreinosParaEdicao() {
                         <option value="B" ${t.letra_treino === 'B' ? 'selected' : ''}>Treino B</option>
                         <option value="C" ${t.letra_treino === 'C' ? 'selected' : ''}>Treino C</option>
                         <option value="D" ${t.letra_treino === 'D' ? 'selected' : ''}>Treino D</option>
-                        <option value="E" ${t.letra_treino === 'E' ? 'selected' : ''}>Treino E</option>
-                    </select>
-                    <select id="edit-grupo-${t.id}">
-                        <option value="Peito" ${t.grupo === 'Peito' ? 'selected' : ''}>Peito</option>
-                        <option value="Costas" ${t.grupo === 'Costas' ? 'selected' : ''}>Costas</option>
-                        <option value="Pernas" ${t.grupo === 'Pernas' ? 'selected' : ''}>Pernas</option>
-                        <option value="Ombros" ${t.grupo === 'Ombros' ? 'selected' : ''}>Ombros</option>
-                        <option value="Braços" ${t.grupo === 'Braços' ? 'selected' : ''}>Braços</option>
-                        <option value="Core" ${t.grupo === 'Core' ? 'selected' : ''}>Core</option>
-                    </select>
-                </div>
-                <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin: 10px 0;">
-                    <input type="number" value="${t.series}" id="edit-ser-${t.id}">
-                    <input type="text" value="${t.reps}" id="edit-rep-${t.id}">
-                    <input type="number" value="${t.descanso}" id="edit-des-${t.id}">
-                </div>
-                <input type="text" value="${t.video_url || ''}" id="edit-video-${t.id}" placeholder="Link do Vídeo">
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="salvarEdicao('${t.id}')" style="flex: 2; background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
-                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; color: white; border: none; padding: 10px; border-radius: 5px; color: white; cursor: pointer;">Excluir</button>
-                </div>
-            </div>`;
-    });
-}
-
-async function salvarEdicao(id) {
-    const { error } = await supabaseClient.from('treinos').update({
-        exercicio: document.getElementById(`edit-nome-${id}`).value,
-        series: parseInt(document.getElementById(`edit-ser-${id}`).value),
-        reps: document.getElementById(`edit-rep-${id}`).value,
-        descanso: parseInt(document.getElementById(`edit-des-${id}`).value),
-        letra_treino: document.getElementById(`edit-letra-${id}`).value,
-        grupo: document.getElementById(`edit-grupo-${id}`).value,
-        video_url: document.getElementById(`edit-video-${id}`).value
-    }).eq('id', id);
-    if (error) alert("Erro!"); else alert("Atualizado!");
-}
-
-async function excluirExercicio(id) {
-    if(confirm("Excluir?")) {
-        const { error } = await supabaseClient.from('treinos').delete().eq('id', id);
-        if(!error) buscarTreinosParaEdicao();
-    }
-}
-
-// 4. FUNÇÕES DO ALUNO
-async function carregarDadosAluno() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) return window.location.href = 'index.html';
-    const { data } = await supabaseClient.from('perfis').select('nome, foto_url, frase').eq('id', user.id).single();
-    if (data) {
-        document.getElementById('nome-aluno').innerText = data.nome;
-        if (data.foto_url) document.getElementById('img-aluno').src = data.foto_url;
-        if (data.frase) document.querySelector('.frase-motivacional').innerText = `"${data.frase}"`;
-    }
-    carregarTreinos(user.id);
-}
-
-window.filtrarTreino = function(letra) {
-    treinoSelecionado = letra;
-    document.querySelectorAll('.filtro-treinos button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(`btn-treino-${letra}`).classList.add('active');
-    supabaseClient.auth.getUser().then(({data}) => { if (data.user) carregarTreinos(data.user.id); });
-};
-
-async function carregarTreinos(alunoId) {
-    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).eq('letra_treino', treinoSelecionado);
-    const container = document.getElementById('lista-exercicios');
-    if (!container) return;
-    
-    container.innerHTML = ""; // Limpa a lista antes de carregar
-    
-    treinos?.forEach(item => {
-        const cor = coresGrupos[item.grupo] || '#ffcc00';
-        container.innerHTML += `
-        <div class="card-treino">
-            <div class="card-content">
-                <div class="info">
-                    <h3 style="color:${cor}">${item.exercicio}</h3>
-                    <span>${item.series}x${item.reps} - ${item.grupo}</span>
-                    <div style="margin-top:8px; display:flex; gap:5px;">
-                        <input type="text" class="input-carga" placeholder="Carga" value="${item.carga || ''}">
-                        <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
-                    </div>
-                    <button onclick="iniciarDescanso(${item.descanso || 60})" class="btn-timer">⏱️ Descanso ${item.descanso || 60}s</button>
-                </div>
-                <div class="acoes">
+                        <option value="E" ${t
