@@ -25,14 +25,14 @@
 
         <section class="admin-card" style="margin-top: 30px;">
             <h3>💪 Prescrever Treino</h3>
-            <div class="form-group" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 12px;">
                 
                 <label for="selectAlunos">1. Selecionar Aluno:</label>
-                <select id="selectAlunos" style="padding: 10px; background: #1e1e1e; color: white; border: 1px solid #333; border-radius: 5px;">
+                <select id="selectAlunos">
                     <option value="">Carregando alunos...</option>
                 </select>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
                     <div>
                         <label>2. Treino:</label>
                         <select id="exLetra" style="margin-top: 5px;">
@@ -54,12 +54,16 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <input type="text" id="exNome" placeholder="Exercício">
-                <input type="number" id="exSeries" placeholder="Sér.">
-                <input type="number" id="exReps" placeholder="Rep.">
-                <input type="number" id="exDescanso" placeholder="Desc. (seg)">
-            </div>
+                <div style="margin-top: 5px;">
+                    <label>4. Detalhes do Exercício:</label>
+                    <input type="text" id="exNome" placeholder="Nome do Exercício" style="margin-top: 5px; margin-bottom: 10px;">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <input type="number" id="exSeries" placeholder="Séries">
+                        <input type="number" id="exReps" placeholder="Reps">
+                        <input type="number" id="exDescanso" placeholder="Desc. (seg)">
+                    </div>
+                </div>
 
                 <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube/Instagram)" style="margin-top: 5px;">
 
