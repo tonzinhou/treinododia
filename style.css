@@ -246,3 +246,49 @@ select {
 .controle-carga button:active {
     transform: scale(0.9);
 }
+/* Botões Mini (Salvar Carga e Timer) */
+.btn-acao-mini, .btn-timer {
+    background: #252525;
+    color: #ffcc00;
+    border: 1px solid #444;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.btn-timer {
+    display: block;
+    width: fit-content;
+    border-color: #ffcc00;
+}
+
+/* Cronômetro Fixo no Topo */
+.cronometro-fixo {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffcc00;
+    color: black;
+    padding: 10px 25px;
+    border-radius: 0 0 15px 15px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: top 0.4s ease;
+    font-family: monospace;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.cronometro-fixo.visible { top: 0; }
+
+.check-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
