@@ -91,25 +91,15 @@
             carregarAlunos();
         };
 
-        // Função para trocar as abas no Admin
         function switchAdminTab(idAba, btn) {
-    // 1. Esconde todas as seções
-    document.getElementById('aba-usuarios').style.display = 'none';
-    document.getElementById('aba-prescrever').style.display = 'none';
-    document.getElementById('aba-editar').style.display = 'none';
-    
-    // 2. Remove a classe ativa de todos os botões
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    // 3. Mostra a aba clicada e ativa o botão
-    document.getElementById(idAba).style.display = 'block';
-    btn.classList.add('active');
-
-    // 4. CRÍTICO: Carrega os alunos para os selects das abas 2 e 3
-    if (typeof carregarAlunos === "function") {
-        carregarAlunos();
-    }
-}
+            document.getElementById('aba-usuarios').style.display = 'none';
+            document.getElementById('aba-prescrever').style.display = 'none';
+            document.getElementById('aba-editar').style.display = 'none';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(idAba).style.display = 'block';
+            btn.classList.add('active');
+            if (typeof carregarAlunos === "function") carregarAlunos();
+        }
     </script>
 </body>
 </html>
