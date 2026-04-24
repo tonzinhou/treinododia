@@ -195,7 +195,25 @@ function toggleVideo(botao, url) {
     }
 }
 
+// 8* controle de carga
 async function logout() {
     await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
+}
+async function salvarCarga(exercicioId, botao) {
+    const card = botao.closest('.card-treino');
+    const valorCarga = card.querySelector('.input-carga').value;
+
+    const { error } = await supabaseClient
+        .from('treinos')
+        .update({ carga: valorCarga })
+        .eq('id', exercicioId);
+
+    if (error) {
+        alert("Erro ao salvar carga: " + error.message);
+    } else {
+        // Efeito visual de sucesso
+        botao.innerText = "✅";
+        setTimeout(() => { botao.innerText = "SALVAR"; }, 2000);
+    }
 }
