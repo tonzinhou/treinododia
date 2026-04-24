@@ -94,10 +94,14 @@ async function cadastrarNovoAluno() {
 
 async function carregarAlunos() {
     const { data } = await supabaseClient.from('perfis').select('id, nome').neq('role', 'admin');
-    const select = document.getElementById('selectAlunos');
-    if (select && data) {
-        select.innerHTML = '<option value="">Selecione o Aluno</option>';
-        data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
+    const select1 = document.getElementById('selectAlunos');
+    const select2 = document.getElementById('selectAlunosEdicao');
+    
+    if (data) {
+        const options = '<option value="">Selecione o Aluno</option>' + 
+                        data.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
+        if(select1) select1.innerHTML = options;
+        if(select2) select2.innerHTML = options;
     }
 }
 
