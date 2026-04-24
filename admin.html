@@ -10,34 +10,37 @@
     <div class="admin-container" style="max-width: 600px; margin: 20px auto; padding: 0 20px;">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1>Painel Admin</h1>
-            <button onclick="logout()" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Sair</button>
+            <button onclick="logout()" class="btn-sair">Sair</button>
         </header>
 
-        <section class="admin-card">
+        <div class="tabs" style="margin-bottom: 20px;">
+            <button class="tab-btn active" onclick="switchAdminTab('aba-usuarios', this)">Usuários</button>
+            <button class="tab-btn" onclick="switchAdminTab('aba-prescrever', this)">Prescrever</button>
+            <button class="tab-btn" onclick="switchAdminTab('aba-editar', this)">Editar Treino</button>
+        </div>
+
+        <section id="aba-usuarios" class="admin-card">
             <h3>+ Cadastrar Novo Aluno</h3>
             <div class="form-group" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="text" id="novoNome" placeholder="Nome Completo do Aluno">
+                <input type="text" id="novoNome" placeholder="Nome Completo">
                 <input type="email" id="novoEmail" placeholder="E-mail de Login">
                 <input type="password" id="novaSenha" placeholder="Senha Temporária">
                 <input type="text" id="novoFoto" placeholder="Link da Foto (URL)">
-                <input type="text" id="novoFrase" placeholder="Frase Motivacional Ex: Foco no objetivo!">
+                <input type="text" id="novoFrase" placeholder="Frase Motivacional">
                 <button class="btn-principal" onclick="cadastrarNovoAluno()">Criar Conta do Aluno</button>
             </div>
         </section>
 
-        <section class="admin-card" style="margin-top: 30px;">
-            <h3>💪 Prescrever Treino</h3>
+        <section id="aba-prescrever" class="admin-card" style="display: none;">
+            <h3>💪 Novo Exercício</h3>
             <div class="form-group" style="display: flex; flex-direction: column; gap: 12px;">
-                
-                <label for="selectAlunos">1. Selecionar Aluno:</label>
-                <select id="selectAlunos">
-                    <option value="">Carregando alunos...</option>
-                </select>
+                <label>1. Selecionar Aluno:</label>
+                <select id="selectAlunos"><option value="">Carregando alunos...</option></select>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
                         <label>2. Treino:</label>
-                        <select id="exLetra" style="margin-top: 5px;">
+                        <select id="exLetra">
                             <option value="A">Treino A</option>
                             <option value="B">Treino B</option>
                             <option value="C">Treino C</option>
@@ -45,7 +48,7 @@
                     </div>
                     <div>
                         <label>3. Grupo Muscular:</label>
-                        <select id="exGrupo" style="margin-top: 5px;">
+                        <select id="exGrupo">
                             <option value="Peito">Peito</option>
                             <option value="Costas">Costas</option>
                             <option value="Pernas">Pernas</option>
@@ -56,23 +59,28 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 5px;">
-                    <label>4. Detalhes do Exercício:</label>
-                    <input type="text" id="exNome" placeholder="Nome do Exercício" style="margin-top: 5px; margin-bottom: 10px;">
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                        <input type="number" id="exSeries" placeholder="Séries">
-                        <input type="number" id="exReps" placeholder="Reps">
-                        <input type="number" id="exDescanso" placeholder="Desc. (seg)">
-                    </div>
+                <label>4. Detalhes:</label>
+                <input type="text" id="exNome" placeholder="Nome do Exercício">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <input type="number" id="exSeries" placeholder="Séries">
+                    <input type="number" id="exReps" placeholder="Reps">
+                    <input type="number" id="exDescanso" placeholder="Desc. (s)">
                 </div>
-
-                <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube/Instagram)" style="margin-top: 5px;">
-
-                <button class="btn-principal" style="background: #2ecc71; color: white; margin-top: 10px;" onclick="atribuirTreino()">
-                    Salvar Exercício na Ficha
-                </button>
+                
+                <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube)">
+                <button class="btn-principal" style="background: #2ecc71; color: white;" onclick="atribuirTreino()">Salvar Exercício</button>
             </div>
+        </section>
+
+        <section id="aba-editar" class="admin-card" style="display: none;">
+            <h3>✏️ Editar / Excluir</h3>
+            <label>Selecione o Aluno para carregar os treinos:</label>
+            <select id="selectAlunosEdicao" onchange="buscarTreinosParaEdicao()">
+                <option value="">Selecione o Aluno</option>
+            </select>
+            
+            <div id="lista-edicao-treinos" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                </div>
         </section>
     </div>
 
@@ -80,12 +88,26 @@
     <script src="script.js"></script>
     <script>
         window.onload = function() {
-            if (typeof carregarAlunos === "function") {
-                carregarAlunos();
-            } else {
-                console.error("A função carregarAlunos não foi encontrada no script.js");
-            }
+            carregarAlunos();
         };
+
+        // Função para trocar as abas no Admin
+        function switchAdminTab(idAba, btn) {
+            // Esconde todas
+            document.getElementById('aba-usuarios').style.display = 'none';
+            document.getElementById('aba-prescrever').style.display = 'none';
+            document.getElementById('aba-editar').style.display = 'none';
+            
+            // Remove classe ativa de todos os botões
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Mostra a selecionada e ativa o botão
+            document.getElementById(idAba).style.display = 'block';
+            btn.classList.add('active');
+
+            // Recarrega alunos sempre que trocar de aba para garantir dados frescos
+            carregarAlunos();
+        }
     </script>
 </body>
 </html>
