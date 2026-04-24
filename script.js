@@ -189,27 +189,42 @@ async function carregarTreinos(alunoId) {
     if (treinos && treinos.length > 0) {
         container.innerHTML = "";
         treinos.forEach(item => {
-            const linkVideo = item.video_url 
-                ? `<a href="${item.video_url}" target="_blank" class="btn-video">Assistir Execução 🎥</a>` 
-                : `<span style="color: #555; font-size: 0.8rem;">Sem vídeo disponível</span>`;
+            // Dentro do carregarTreinos, mude a linha do botão:
+const linkVideo = item.video_url 
+    ? `<button onclick="abrirVideo('${item.video_url}')" class="btn-video">Assistir Execução 🎥</button>` 
+    : `<span>Sem vídeo</span>`;
 
-            container.innerHTML += `
-                <div class="card-treino">
-                    <div class="info">
-                        <h3>${item.exercicio}</h3>
-                        <span>${item.series} séries de ${item.reps} reps</span>
-                        <div style="margin-top: 10px;">${linkVideo}</div>
-                    </div>
-                    <div class="check">✅</div>
-                </div>
-            `;
-        });
+// FORA das outras funções, adicione estas:
+
+function abrirVideo(url) {
+    let videoId = "";
+    
+    // Converte links normais do YouTube para o formato embed
+    if (url.includes("youtube.com/watch?v=")) {
+        videoId = url.split("v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1];
+    }
+
+    if (videoId) {
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        document.getElementById('videoPlayer').src = embedUrl;
+        document.getElementById('videoModal').style.display = "block";
     } else {
-        container.innerHTML = "<p>Nenhum treino encontrado.</p>";
+        // Se não for YouTube (ex: Instagram), ele abre em outra aba como antes
+        window.open(url, '_blank');
     }
 }
 
-async function logout() {
-    await supabaseClient.auth.signOut();
-    window.location.href = 'index.html';
+function fecharModal() {
+    document.getElementById('videoModal').style.display = "none";
+    document.getElementById('videoPlayer').src = ""; // Para o vídeo parar de tocar
+}
+
+// Fecha o modal se o usuário clicar fora do vídeo
+window.onclick = function(event) {
+    const modal = document.getElementById('videoModal');
+    if (event.target == modal) {
+        fecharModal();
+    }
 }
