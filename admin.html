@@ -8,9 +8,9 @@
 </head>
 <body>
     <div class="admin-container" style="max-width: 600px; margin: 20px auto; padding: 0 20px;">
-        <header style="display: flex; justify-content: space-between; align-items: center;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1>Painel Admin</h1>
-            <button onclick="logout()" style="background: #ff4444; padding: 5px 10px;">Sair</button>
+            <button onclick="logout()" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Sair</button>
         </header>
 
         <section class="admin-card">
@@ -26,26 +26,53 @@
         <section class="admin-card" style="margin-top: 30px;">
             <h3>💪 Prescrever Treino</h3>
             <div class="form-group" style="display: flex; flex-direction: column; gap: 10px;">
-                <label for="selectAlunos">Selecionar Aluno:</label>
-                <select id="selectAlunos" style="padding: 10px; background: #121212; color: white;">
+                
+                <label for="selectAlunos">1. Selecionar Aluno:</label>
+                <select id="selectAlunos" style="padding: 10px; background: #1e1e1e; color: white; border: 1px solid #333; border-radius: 5px;">
                     <option value="">Carregando alunos...</option>
                 </select>
 
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="exNome" placeholder="Exercício">
-                    <input type="number" id="exSeries" placeholder="Sér.">
-                    <input type="number" id="exReps" placeholder="Rep.">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div>
+                        <label>2. Treino:</label>
+                        <select id="exLetra" style="margin-top: 5px;">
+                            <option value="A">Treino A</option>
+                            <option value="B">Treino B</option>
+                            <option value="C">Treino C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>3. Grupo Muscular:</label>
+                        <select id="exGrupo" style="margin-top: 5px;">
+                            <option value="Peito">Peito</option>
+                            <option value="Costas">Costas</option>
+                            <option value="Pernas">Pernas</option>
+                            <option value="Ombros">Ombros</option>
+                            <option value="Braços">Braços</option>
+                            <option value="Core">Core/Abdominais</option>
+                        </select>
+                    </div>
                 </div>
-                <button class="btn-principal" style="background: #2ecc71; color: white;" onclick="atribuirTreino()">Adicionar Exercício ao Aluno</button>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="exNome" placeholder="Nome do Exercício">
+                    <input type="number" id="exSeries" placeholder="Séries">
+                    <input type="number" id="exReps" placeholder="Reps">
+                </div>
+
+                <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube/Instagram)" style="margin-top: 5px;">
+
+                <button class="btn-principal" style="background: #2ecc71; color: white; margin-top: 10px;" onclick="atribuirTreino()">
+                    Salvar Exercício na Ficha
+                </button>
             </div>
         </section>
     </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
     <script>
         window.onload = function() {
-            // Verificamos se a função existe antes de chamar para não travar
             if (typeof carregarAlunos === "function") {
                 carregarAlunos();
             } else {
@@ -53,6 +80,5 @@
             }
         };
     </script>
-<input type="text" id="exVideo" placeholder="Link do vídeo (YouTube/Instagram)" style="width: 100%; margin-top: 10px;">
 </body>
 </html>
