@@ -103,18 +103,24 @@ async function atribuirTreino() {
 // Função para o aluno trocar entre Treino A, B ou C
 window.filtrarTreino = function(letra) {
     treinoSelecionado = letra;
-    
-    // Atualiza visual dos botões de filtro (se existirem)
+    console.log("Mudando para o treino:", letra);
+
+    // 1. Atualiza o visual dos botões
     document.querySelectorAll('.filtro-treinos button').forEach(btn => {
+        btn.classList.remove('active'); // Remove a cor amarela de todos
         btn.style.background = '#252525';
         btn.style.color = 'white';
     });
-    const btnAtivo = event.target;
-    if(btnAtivo) {
+
+    // 2. Destaca o botão clicado
+    const btnAtivo = document.getElementById(`btn-treino-${letra}`);
+    if (btnAtivo) {
+        btnAtivo.classList.add('active');
         btnAtivo.style.background = '#ffcc00';
         btnAtivo.style.color = 'black';
     }
 
+    // 3. Recarrega os dados do banco
     supabaseClient.auth.getUser().then(({data}) => {
         if (data.user) carregarTreinos(data.user.id);
     });
