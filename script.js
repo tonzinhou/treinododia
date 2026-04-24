@@ -7,6 +7,7 @@ let abaAtual = 'usuario';
 
 // 2. FUNÇÃO DE TROCA DE ABAS
 window.switchTab = function(tipo) {
+    console.log("Trocando para a aba:", tipo);
     abaAtual = tipo;
     const btnAluno = document.getElementById('tab-aluno');
     const btnAdmin = document.getElementById('tab-admin');
@@ -40,7 +41,9 @@ async function fazerLogin() {
         });
         if (error) return alert("Erro: " + error.message);
         if (data.user) verificarPermissao(data.user.id);
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error(err); 
+    }
 }
 
 async function verificarPermissao(userId) {
@@ -51,7 +54,7 @@ async function verificarPermissao(userId) {
     if (perfil.role.trim().toLowerCase() === abaAtual.trim().toLowerCase()) {
         window.location.href = perfil.role === 'admin' ? 'admin.html' : 'aluno.html';
     } else {
-        alert("Acesso Negado!");
+        alert("Acesso Negado! Sua conta é " + perfil.role + " mas você tentou entrar como " + abaAtual);
         await supabaseClient.auth.signOut();
     }
 }
@@ -77,7 +80,9 @@ async function carregarAlunos() {
     const select = document.getElementById('selectAlunos');
     if (select && data) {
         select.innerHTML = '<option value="">Selecione o Aluno</option>';
-        data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
+        data.forEach(a => {
+            select.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
+        });
     }
 }
 
@@ -123,29 +128,41 @@ async function carregarTreinos(alunoId) {
                     <div class="check">✅</div>
                 </div>`;
         });
+    } else {
+        container.innerHTML = "<p>Nenhum treino encontrado.</p>";
     }
 }
 
-// 6. LÓGICA DO MODAL DE VÍDEO (SOLTA NO ARQUIVO)
+// 6. LÓGICA DO MODAL DE VÍDEO
 function abrirVideo(url) {
     let videoId = "";
-    if (url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
-    else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1];
+    if (url.includes("v=")) {
+        videoId = url.split("v=")[1].split("&")[0];
+    } else if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1];
+    }
 
     if (videoId) {
-        document.getElementById('videoPlayer').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-        document.getElementById('videoModal').style.display = "block";
+        const modal = document.getElementById('videoModal');
+        const iframe = document.getElementById('videoPlayer');
+        if (modal && iframe) {
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            modal.style.display = "block";
+        }
     } else {
         window.open(url, '_blank');
     }
 }
 
 function fecharModal() {
-    document.getElementById('videoModal').style.display = "none";
-    document.getElementById('videoPlayer').src = "";
+    const modal = document.getElementById('videoModal');
+    const iframe = document.getElementById('videoPlayer');
+    if (modal && iframe) {
+        modal.style.display = "none";
+        iframe.src = "";
+    }
 }
 
-// Fecha se clicar fora
 window.onclick = function(event) {
     const modal = document.getElementById('videoModal');
     if (event.target == modal) fecharModal();
