@@ -4,8 +4,19 @@ const SUPABASE_KEY = 'sb_publishable_r-__wMRaOzmh1AGM-tSkbQ_Kp5HkQUx';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let abaAtual = 'usuario';
+let treinoSelecionado = 'A'; // Padrão inicial para o aluno
 
-// 2. CONTROLE DE ABAS (LOGIN)
+// 2. MAPEAMENTO DE CORES POR GRUPO MUSCULAR
+const coresGrupos = {
+    'Peito': '#ff4444',    // Vermelho
+    'Costas': '#44ff44',   // Verde
+    'Pernas': '#4444ff',   // Azul
+    'Ombros': '#ff8800',   // Laranja
+    'Braços': '#ff44ff',   // Rosa/Roxo
+    'Core': '#00ffff'      // Ciano
+};
+
+// 3. CONTROLE DE ABAS (LOGIN)
 window.switchTab = function(tipo) {
     abaAtual = tipo;
     const btnAluno = document.getElementById('tab-aluno');
@@ -28,7 +39,7 @@ window.switchTab = function(tipo) {
     }
 };
 
-// 3. LOGIN E PERMISSÕES
+// 4. LOGIN E PERMISSÕES
 async function fazerLogin() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -49,7 +60,7 @@ async function verificarPermissao(userId) {
     }
 }
 
-// 4. FUNÇÕES DO ADMIN
+// 5. FUNÇÕES DO ADMIN (CADASTRO E PRESCRIÇÃO)
 async function cadastrarNovoAluno() {
     const nome = document.getElementById('novoNome').value;
     const email = document.getElementById('novoEmail').value;
@@ -80,22 +91,51 @@ async function atribuirTreino() {
         exercicio: document.getElementById('exNome').value,
         series: parseInt(document.getElementById('exSeries').value),
         reps: parseInt(document.getElementById('exReps').value),
-        video_url: document.getElementById('exVideo').value
+        video_url: document.getElementById('exVideo').value,
+        letra_treino: document.getElementById('exLetra').value, // NOVO
+        grupo: document.getElementById('exGrupo').value          // NOVO
     }]);
     if (error) alert(error.message); else alert("Treino salvo!");
 }
 
-// 5. FUNÇÕES DO ALUNO (COM EFEITO SANFONA)
+// 6. FUNÇÕES DO ALUNO (FILTROS E EXIBIÇÃO)
+
+// Função para o aluno trocar entre Treino A, B ou C
+window.filtrarTreino = function(letra) {
+    treinoSelecionado = letra;
+    
+    // Atualiza visual dos botões de filtro (se existirem)
+    document.querySelectorAll('.filtro-treinos button').forEach(btn => {
+        btn.style.background = '#252525';
+        btn.style.color = 'white';
+    });
+    const btnAtivo = event.target;
+    if(btnAtivo) {
+        btnAtivo.style.background = '#ffcc00';
+        btnAtivo.style.color = 'black';
+    }
+
+    supabaseClient.auth.getUser().then(({data}) => {
+        if (data.user) carregarTreinos(data.user.id);
+    });
+};
+
 async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return window.location.href = 'index.html';
     const { data } = await supabaseClient.from('perfis').select('nome').eq('id', user.id).single();
     if (data) document.getElementById('nome-aluno').innerText = data.nome;
+    
     carregarTreinos(user.id);
 }
 
 async function carregarTreinos(alunoId) {
-    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId);
+    const { data: treinos, error } = await supabaseClient
+        .from('treinos')
+        .select('*')
+        .eq('aluno_id', alunoId)
+        .eq('letra_treino', treinoSelecionado); // Filtra pela aba A, B ou C
+
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
 
@@ -103,17 +143,19 @@ async function carregarTreinos(alunoId) {
         container.innerHTML = "";
         treinos.forEach(item => {
             const temVideo = item.video_url && item.video_url.includes("youtu");
+            const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00'; // Usa a cor do grupo ou dourado
             
             container.innerHTML += `
                 <div class="card-treino">
                     <div class="card-content">
                         <div class="info">
-                            <h3>${item.exercicio}</h3>
+                            <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
+                            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">${item.grupo}</span><br>
                             <span>${item.series} x ${item.reps}</span>
                         </div>
                         <div class="acoes">
                             ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
-                            <span style="margin-left:10px">✅</span>
+                            <span style="margin-left:10px; cursor:pointer;">✅</span>
                         </div>
                     </div>
                     <div class="video-dropdown">
@@ -124,11 +166,11 @@ async function carregarTreinos(alunoId) {
                 </div>`;
         });
     } else {
-        container.innerHTML = "<p class='msg-vazio'>Nenhum treino prescrito.</p>";
+        container.innerHTML = `<p class='msg-vazio'>Nenhum exercício para o Treino ${treinoSelecionado}.</p>`;
     }
 }
 
-// 6. LÓGICA DE ABRIR/FECHAR VÍDEO
+// 7. LÓGICA DE ABRIR/FECHAR VÍDEO
 function toggleVideo(botao, url) {
     const card = botao.closest('.card-treino');
     const gaveta = card.querySelector('.video-dropdown');
@@ -139,7 +181,6 @@ function toggleVideo(botao, url) {
         iframe.src = "";
         botao.innerText = "VÍDEO ▾";
     } else {
-        // Extrair ID do YouTube
         let videoId = "";
         if (url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
         else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1];
