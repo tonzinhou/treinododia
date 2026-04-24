@@ -283,11 +283,34 @@ async function salvarCarga(id, btn) {
 function toggleVideo(btn, url) {
     const gaveta = btn.closest('.card-treino').querySelector('.video-dropdown');
     const iframe = gaveta.querySelector('iframe');
-    if (gaveta.classList.contains('open')) { gaveta.classList.remove('open'); iframe.src = ""; btn.innerText = "VÍDEO ▾"; }
-    else { 
-        let id = url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("youtu.be/")[1]; 
-        iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`; 
-        gaveta.classList.add('open'); btn.innerText = "FECHAR ▴"; 
+
+    if (gaveta.classList.contains('open')) {
+        gaveta.classList.remove('open');
+        iframe.src = "";
+        btn.innerText = "VÍDEO ▾";
+    } else {
+        let videoId = "";
+
+        // Lógica para extrair ID de diferentes tipos de link do YouTube
+        if (url.includes("shorts/")) {
+            // Se for link de SHORTS
+            videoId = url.split("shorts/")[1].split("?")[0];
+        } else if (url.includes("v=")) {
+            // Se for link comum de PC
+            videoId = url.split("v=")[1].split("&")[0];
+        } else if (url.includes("youtu.be/")) {
+            // Se for link de COMPARTILHAR do celular
+            videoId = url.split("youtu.be/")[1].split("?")[0];
+        }
+
+        if (videoId) {
+            // Converte para o formato de EMBED que o site aceita
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            gaveta.classList.add('open');
+            btn.innerText = "FECHAR ▴";
+        } else {
+            alert("Link de vídeo inválido.");
+        }
     }
 }
 
