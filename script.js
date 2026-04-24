@@ -205,12 +205,29 @@ async function carregarTreinos(alunoId) {
     const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).eq('letra_treino', treinoSelecionado);
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
-    container.innerHTML = "";
-    treinos?.forEach(item => {
-        const cor = coresGrupos[item.grupo] || '#ffcc00';
-        container.innerHTML += `<div class="card-treino"><div class="card-content"><div class="info"><h3 style="color:${cor}">${item.exercicio}</h3><span>${item.series}x${item.reps} - ${item.grupo}</span><div style="margin-top:8px; display:flex; gap:5px;"><input type="text" class="input-carga" value="${item.carga || ''}"><button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button></div><button onclick="iniciarDescanso(${item.descanso || 60})" class="btn-timer">⏱️ Descanso ${item.descanso || 60}s</button></div><div class="acoes"><span onclick="toggleCheck(this)" class="check-icon">✅</span>${item.video_url ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}</div></div><div class="video-dropdown"><div class="video-container"><iframe src=""></iframe></div></div></div>`;
-    });
-}
+    container.innerHTML += `
+    <div class="card-treino">
+        <div class="card-content">
+            <div class="info">
+                <h3 style="color:${cor}">${item.exercicio}</h3>
+                <span>${item.series}x${item.reps} - ${item.grupo}</span>
+                <div style="margin-top:8px; display:flex; gap:5px;">
+                    <input type="text" class="input-carga" placeholder="Carga" value="${item.carga || ''}">
+                    <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
+                </div>
+                <button onclick="iniciarDescanso(${item.descanso || 60})" class="btn-timer">⏱️ Descanso ${item.descanso || 60}s</button>
+            </div>
+            <div class="acoes">
+                <span onclick="toggleCheck(this)" class="check-icon">✅</span>
+                ${item.video_url ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
+            </div>
+        </div>
+        <div class="video-dropdown">
+            <div class="video-container">
+                <iframe src=""></iframe>
+            </div>
+        </div>
+    </div>`;
 
 function iniciarDescanso(segundos) {
     clearInterval(intervaloTimer);
