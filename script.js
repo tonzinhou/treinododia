@@ -5,9 +5,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let abaAtual = 'usuario';
 
-// 2. FUNÇÃO DE TROCA DE ABAS
+// 2. CONTROLE DE ABAS (LOGIN)
 window.switchTab = function(tipo) {
-    console.log("Trocando para a aba:", tipo);
     abaAtual = tipo;
     const btnAluno = document.getElementById('tab-aluno');
     const btnAdmin = document.getElementById('tab-admin');
@@ -29,37 +28,28 @@ window.switchTab = function(tipo) {
     }
 };
 
-// 3. FUNÇÃO DE LOGIN
+// 3. LOGIN E PERMISSÕES
 async function fazerLogin() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     if (!email || !password) return alert("Preencha e-mail e senha.");
 
-    try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email, password: password
-        });
-        if (error) return alert("Erro: " + error.message);
-        if (data.user) verificarPermissao(data.user.id);
-    } catch (err) { 
-        console.error(err); 
-    }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) return alert("Erro: " + error.message);
+    if (data.user) verificarPermissao(data.user.id);
 }
 
 async function verificarPermissao(userId) {
-    const { data } = await supabaseClient.from('perfis').select('role').eq('id', userId);
-    if (!data || data.length === 0) return alert("Perfil não encontrado.");
-    
-    const perfil = data[0];
-    if (perfil.role.trim().toLowerCase() === abaAtual.trim().toLowerCase()) {
-        window.location.href = perfil.role === 'admin' ? 'admin.html' : 'aluno.html';
+    const { data } = await supabaseClient.from('perfis').select('role').eq('id', userId).single();
+    if (data && data.role.toLowerCase() === abaAtual.toLowerCase()) {
+        window.location.href = data.role === 'admin' ? 'admin.html' : 'aluno.html';
     } else {
-        alert("Acesso Negado! Sua conta é " + perfil.role + " mas você tentou entrar como " + abaAtual);
+        alert("Acesso Negado para esta categoria!");
         await supabaseClient.auth.signOut();
     }
 }
 
-// 4. FUNÇÕES ADMIN
+// 4. FUNÇÕES DO ADMIN
 async function cadastrarNovoAluno() {
     const nome = document.getElementById('novoNome').value;
     const email = document.getElementById('novoEmail').value;
@@ -70,7 +60,7 @@ async function cadastrarNovoAluno() {
 
     if (data.user) {
         await supabaseClient.from('perfis').insert([{ id: data.user.id, nome, role: 'usuario' }]);
-        alert("Cadastrado!");
+        alert("Aluno Cadastrado!");
         carregarAlunos();
     }
 }
@@ -80,9 +70,7 @@ async function carregarAlunos() {
     const select = document.getElementById('selectAlunos');
     if (select && data) {
         select.innerHTML = '<option value="">Selecione o Aluno</option>';
-        data.forEach(a => {
-            select.innerHTML += `<option value="${a.id}">${a.nome}</option>`;
-        });
+        data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
     }
 }
 
@@ -97,7 +85,7 @@ async function atribuirTreino() {
     if (error) alert(error.message); else alert("Treino salvo!");
 }
 
-// 5. FUNÇÕES ALUNO
+// 5. FUNÇÕES DO ALUNO (COM EFEITO SANFONA)
 async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return window.location.href = 'index.html';
@@ -114,59 +102,57 @@ async function carregarTreinos(alunoId) {
     if (treinos && treinos.length > 0) {
         container.innerHTML = "";
         treinos.forEach(item => {
-            const btnVideo = item.video_url 
-                ? `<button onclick="abrirVideo('${item.video_url}')" class="btn-video">Assistir Execução 🎥</button>` 
-                : `<span style="color:#555">Sem vídeo</span>`;
-
+            const temVideo = item.video_url && item.video_url.includes("youtu");
+            
             container.innerHTML += `
                 <div class="card-treino">
-                    <div class="info">
-                        <h3>${item.exercicio}</h3>
-                        <span>${item.series} x ${item.reps}</span>
-                        <div style="margin-top:10px">${btnVideo}</div>
+                    <div class="card-content">
+                        <div class="info">
+                            <h3>${item.exercicio}</h3>
+                            <span>${item.series} x ${item.reps}</span>
+                        </div>
+                        <div class="acoes">
+                            ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
+                            <span style="margin-left:10px">✅</span>
+                        </div>
                     </div>
-                    <div class="check">✅</div>
+                    <div class="video-dropdown">
+                        <div class="video-container">
+                            <iframe src="" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
                 </div>`;
         });
     } else {
-        container.innerHTML = "<p>Nenhum treino encontrado.</p>";
+        container.innerHTML = "<p class='msg-vazio'>Nenhum treino prescrito.</p>";
     }
 }
 
-// 6. LÓGICA DO MODAL DE VÍDEO
-function abrirVideo(url) {
-    let videoId = "";
-    if (url.includes("v=")) {
-        videoId = url.split("v=")[1].split("&")[0];
-    } else if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1];
-    }
+// 6. LÓGICA DE ABRIR/FECHAR VÍDEO
+function toggleVideo(botao, url) {
+    const card = botao.closest('.card-treino');
+    const gaveta = card.querySelector('.video-dropdown');
+    const iframe = gaveta.querySelector('iframe');
 
-    if (videoId) {
-        const modal = document.getElementById('videoModal');
-        const iframe = document.getElementById('videoPlayer');
-        if (modal && iframe) {
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            modal.style.display = "block";
-        }
-    } else {
-        window.open(url, '_blank');
-    }
-}
-
-function fecharModal() {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('videoPlayer');
-    if (modal && iframe) {
-        modal.style.display = "none";
+    if (gaveta.classList.contains('open')) {
+        gaveta.classList.remove('open');
         iframe.src = "";
+        botao.innerText = "VÍDEO ▾";
+    } else {
+        // Extrair ID do YouTube
+        let videoId = "";
+        if (url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
+        else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1];
+
+        if (videoId) {
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            gaveta.classList.add('open');
+            botao.innerText = "FECHAR ▴";
+        } else {
+            window.open(url, '_blank');
+        }
     }
 }
-
-window.onclick = function(event) {
-    const modal = document.getElementById('videoModal');
-    if (event.target == modal) fecharModal();
-};
 
 async function logout() {
     await supabaseClient.auth.signOut();
