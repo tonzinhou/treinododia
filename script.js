@@ -41,23 +41,22 @@ window.switchTab = function(tipo) {
 };
 
 async function fazerLogin() {
-    const email = document.getElementById('email').value;
+    const nickOuEmail = document.getElementById('email').value.trim().toLowerCase();
     const password = document.getElementById('password').value;
-    if (!email || !password) return alert("Preencha e-mail e senha.");
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) return alert("Erro: " + error.message);
+    if (!nickOuEmail || !password) return alert("Preencha todos os campos.");
+
+    // Se o que ele digitou não tiver '@', assumimos que é um nickname e completamos o e-mail
+    const loginFinal = nickOuEmail.includes('@') ? nickOuEmail : `${nickOuEmail}@academia.com`;
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+        email: loginFinal, 
+        password 
+    });
+
+    if (error) return alert("Acesso negado: Nickname ou senha incorretos.");
+    
     if (data.user) verificarPermissao(data.user.id);
-}
-
-async function verificarPermissao(userId) {
-    const { data } = await supabaseClient.from('perfis').select('role').eq('id', userId).single();
-    if (data && data.role.toLowerCase() === abaAtual.toLowerCase()) {
-        window.location.href = data.role === 'admin' ? 'admin.html' : 'aluno.html';
-    } else {
-        alert("Acesso Negado para esta categoria!");
-        await supabaseClient.auth.signOut();
-    }
 }
 
 // 3. FUNÇÕES DO ADMINISTRADOR (CADASTRO E PRESCRIÇÃO)
