@@ -1,0 +1,125 @@
+/* Reset básico */
+body {
+    background-color: #121212;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: #252525;
+    color: #888;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tab-btn.active {
+    background: #ffcc00;
+    color: #000;
+}
+
+.login-box {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+input {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #121212;
+    color: white;
+}
+
+.btn-principal {
+    padding: 12px;
+    background: #ffcc00;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Estilos para a página Admin */
+.admin-card {
+    background: #1e1e1e;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+
+.container-aluno {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.header-aluno {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.btn-sair {
+    background: #ff4444;
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.card-treino {
+    background: #1e1e1e;
+    border-left: 6px solid #ffcc00;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.card-treino h3 {
+    margin: 0;
+    color: #ffcc00;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+}
+
+.card-treino span {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.msg-vazio {
+    text-align: center;
+    color: #888;
+    margin-top: 50px;
+}

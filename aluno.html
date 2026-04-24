@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Treino - Área do Aluno</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-aluno">
+        <header class="header-aluno">
+            <div>
+                <span>Bem-vindo,</span>
+                <h1 id="nome-aluno">Carregando...</h1>
+            </div>
+            <button class="btn-sair" onclick="logout()">Sair</button>
+        </header>
+
+        <section class="treino-secao">
+            <h2>💪 Seu Treino de Hoje</h2>
+            <div id="lista-exercicios">
+                <p class="msg-status">Buscando sua ficha no banco...</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+    <script>
+        // Executa assim que a página termina de carregar
+        window.onload = function() {
+            carregarDadosAluno();
+        };
+    </script>
+</body>
+</html>
