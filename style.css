@@ -311,3 +311,28 @@ input, select {
 #lista-edicao-treinos button:hover {
     opacity: 0.8;
 }
+
+.foto-perfil {
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.foto-perfil:hover {
+    transform: scale(1.05); /* Dá um zoom leve ao passar o mouse */
+}
+
+/* Adiciona um ícone de "editar" discreto sobre a foto ao passar o mouse */
+.foto-perfil:hover::after {
+    content: "📷";
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
