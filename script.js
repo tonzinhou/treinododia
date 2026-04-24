@@ -7,9 +7,7 @@ let abaAtual = 'usuario';
 
 // 2. FUNÇÃO DE TROCA DE ABAS
 window.switchTab = function(tipo) {
-    console.log("Trocando para a aba:", tipo);
     abaAtual = tipo;
-
     const btnAluno = document.getElementById('tab-aluno');
     const btnAdmin = document.getElementById('tab-admin');
     const titulo = document.getElementById('login-title');
@@ -34,197 +32,126 @@ window.switchTab = function(tipo) {
 async function fazerLogin() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-
-    if (!email || !password) {
-        alert("Por favor, preencha e-mail e senha.");
-        return;
-    }
+    if (!email || !password) return alert("Preencha e-mail e senha.");
 
     try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
+            email: email, password: password
         });
-
-        if (error) {
-            alert("Erro no login: " + error.message);
-            return;
-        }
-
-        if (data.user) {
-            verificarPermissao(data.user.id);
-        }
-    } catch (err) {
-        console.error("Erro inesperado:", err);
-    }
+        if (error) return alert("Erro: " + error.message);
+        if (data.user) verificarPermissao(data.user.id);
+    } catch (err) { console.error(err); }
 }
 
-// 4. VERIFICAÇÃO DE PERMISSÃO E REDIRECIONAMENTO
 async function verificarPermissao(userId) {
-    const { data, error } = await supabaseClient
-        .from('perfis')
-        .select('role')
-        .eq('id', userId);
-
-    if (error) {
-        alert("Erro técnico: " + error.message);
-        return;
-    }
-
-    if (!data || data.length === 0) {
-        alert("Perfil não encontrado na tabela 'perfis'.");
-        await supabaseClient.auth.signOut();
-        return;
-    }
-
-    const perfil = data[0];
+    const { data } = await supabaseClient.from('perfis').select('role').eq('id', userId);
+    if (!data || data.length === 0) return alert("Perfil não encontrado.");
     
-    // Compara a aba selecionada com o cargo no banco
+    const perfil = data[0];
     if (perfil.role.trim().toLowerCase() === abaAtual.trim().toLowerCase()) {
         window.location.href = perfil.role === 'admin' ? 'admin.html' : 'aluno.html';
     } else {
-        alert("Acesso Negado! Você tentou entrar como " + abaAtual + " mas seu perfil é " + perfil.role);
+        alert("Acesso Negado!");
         await supabaseClient.auth.signOut();
     }
 }
 
-// 5. FUNÇÕES DO PAINEL ADMIN
+// 4. FUNÇÕES ADMIN
 async function cadastrarNovoAluno() {
     const nome = document.getElementById('novoNome').value;
     const email = document.getElementById('novoEmail').value;
     const password = document.getElementById('novaSenha').value;
 
-    const { data, error } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Erro ao criar login: " + error.message);
-        return;
-    }
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) return alert(error.message);
 
     if (data.user) {
-        const { error: profileError } = await supabaseClient
-            .from('perfis')
-            .insert([{ id: data.user.id, nome: nome, role: 'usuario' }]);
-
-        if (profileError) {
-            alert("Erro ao salvar perfil: " + profileError.message);
-        } else {
-            alert(`Aluno ${nome} cadastrado!`);
-            carregarAlunos();
-        }
+        await supabaseClient.from('perfis').insert([{ id: data.user.id, nome, role: 'usuario' }]);
+        alert("Cadastrado!");
+        carregarAlunos();
     }
 }
 
 async function carregarAlunos() {
-    const { data, error } = await supabaseClient
-        .from('perfis')
-        .select('id, nome')
-        .neq('role', 'admin');
-
+    const { data } = await supabaseClient.from('perfis').select('id, nome').neq('role', 'admin');
     const select = document.getElementById('selectAlunos');
-    if (!select) return;
-
-    if (data) {
+    if (select && data) {
         select.innerHTML = '<option value="">Selecione o Aluno</option>';
-        data.forEach(aluno => {
-            let option = document.createElement('option');
-            option.value = aluno.id;
-            option.text = aluno.nome;
-            select.appendChild(option);
-        });
+        data.forEach(a => select.innerHTML += `<option value="${a.id}">${a.nome}</option>`);
     }
 }
 
 async function atribuirTreino() {
-    const alunoId = document.getElementById('selectAlunos').value;
-    const exercicio = document.getElementById('exNome').value;
-    const series = document.getElementById('exSeries').value;
-    const reps = document.getElementById('exReps').value;
-    const videoUrl = document.getElementById('exVideo').value;
-
-    const { error } = await supabaseClient
-        .from('treinos')
-        .insert([{ 
-            aluno_id: alunoId, 
-            exercicio: exercicio, 
-            series: parseInt(series), 
-            reps: parseInt(reps),
-            video_url: videoUrl 
-        }]);
-
-    if (error) alert("Erro: " + error.message);
-    else alert("Treino salvo!");
+    const { error } = await supabaseClient.from('treinos').insert([{ 
+        aluno_id: document.getElementById('selectAlunos').value,
+        exercicio: document.getElementById('exNome').value,
+        series: parseInt(document.getElementById('exSeries').value),
+        reps: parseInt(document.getElementById('exReps').value),
+        video_url: document.getElementById('exVideo').value
+    }]);
+    if (error) alert(error.message); else alert("Treino salvo!");
 }
 
-// 6. FUNÇÕES DA ÁREA DO ALUNO
+// 5. FUNÇÕES ALUNO
 async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    const { data: perfil } = await supabaseClient
-        .from('perfis')
-        .select('nome')
-        .eq('id', user.id)
-        .single();
-
-    if (perfil) document.getElementById('nome-aluno').innerText = perfil.nome;
+    if (!user) return window.location.href = 'index.html';
+    const { data } = await supabaseClient.from('perfis').select('nome').eq('id', user.id).single();
+    if (data) document.getElementById('nome-aluno').innerText = data.nome;
     carregarTreinos(user.id);
 }
 
 async function carregarTreinos(alunoId) {
-    const { data: treinos, error } = await supabaseClient
-        .from('treinos')
-        .select('*')
-        .eq('aluno_id', alunoId);
-
+    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId);
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
 
     if (treinos && treinos.length > 0) {
         container.innerHTML = "";
         treinos.forEach(item => {
-            // Dentro do carregarTreinos, mude a linha do botão:
-const linkVideo = item.video_url 
-    ? `<button onclick="abrirVideo('${item.video_url}')" class="btn-video">Assistir Execução 🎥</button>` 
-    : `<span>Sem vídeo</span>`;
+            const btnVideo = item.video_url 
+                ? `<button onclick="abrirVideo('${item.video_url}')" class="btn-video">Assistir Execução 🎥</button>` 
+                : `<span style="color:#555">Sem vídeo</span>`;
 
-// FORA das outras funções, adicione estas:
+            container.innerHTML += `
+                <div class="card-treino">
+                    <div class="info">
+                        <h3>${item.exercicio}</h3>
+                        <span>${item.series} x ${item.reps}</span>
+                        <div style="margin-top:10px">${btnVideo}</div>
+                    </div>
+                    <div class="check">✅</div>
+                </div>`;
+        });
+    }
+}
 
+// 6. LÓGICA DO MODAL DE VÍDEO (SOLTA NO ARQUIVO)
 function abrirVideo(url) {
     let videoId = "";
-    
-    // Converte links normais do YouTube para o formato embed
-    if (url.includes("youtube.com/watch?v=")) {
-        videoId = url.split("v=")[1].split("&")[0];
-    } else if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1];
-    }
+    if (url.includes("v=")) videoId = url.split("v=")[1].split("&")[0];
+    else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1];
 
     if (videoId) {
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-        document.getElementById('videoPlayer').src = embedUrl;
+        document.getElementById('videoPlayer').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
         document.getElementById('videoModal').style.display = "block";
     } else {
-        // Se não for YouTube (ex: Instagram), ele abre em outra aba como antes
         window.open(url, '_blank');
     }
 }
 
 function fecharModal() {
     document.getElementById('videoModal').style.display = "none";
-    document.getElementById('videoPlayer').src = ""; // Para o vídeo parar de tocar
+    document.getElementById('videoPlayer').src = "";
 }
 
-// Fecha o modal se o usuário clicar fora do vídeo
+// Fecha se clicar fora
 window.onclick = function(event) {
     const modal = document.getElementById('videoModal');
-    if (event.target == modal) {
-        fecharModal();
-    }
+    if (event.target == modal) fecharModal();
+};
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
 }
