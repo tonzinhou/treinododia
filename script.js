@@ -72,7 +72,6 @@ async function cadastrarNovoAluno() {
     if (!nome || !nick || !password) return alert("Preencha Nome, Nickname e Senha!");
 
     const emailFicticio = `${nick}@academia.com`;
-
     const { data, error } = await supabaseClient.auth.signUp({ email: emailFicticio, password });
 
     if (error) return alert("Erro Auth: " + error.message);
@@ -83,9 +82,7 @@ async function cadastrarNovoAluno() {
             foto_url: foto_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
             frase: frase || 'Foco na missão!'
         }]);
-
         if (perfilError) return alert("Erro Perfil: " + perfilError.message);
-        
         alert(`Aluno ${nick} cadastrado!`);
         carregarAlunos();
     }
@@ -148,13 +145,13 @@ async function buscarTreinosParaEdicao() {
                 <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin: 10px 0;">
                     <input type="number" value="${t.series}" id="edit-ser-${t.id}">
-                    <input type="number" value="${t.reps}" id="edit-rep-${t.id}">
-                    <input type="number" value="${t.des || t.descanso}" id="edit-des-${t.id}">
+                    <input type="text" value="${t.reps}" id="edit-rep-${t.id}">
+                    <input type="number" value="${t.descanso}" id="edit-des-${t.id}">
                 </div>
                 <input type="text" value="${t.video_url || ''}" id="edit-video-${t.id}" placeholder="Link do Vídeo">
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <button onclick="salvarEdicao('${t.id}')" style="flex: 2; background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Salvar</button>
-                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Excluir</button>
+                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; color: white; border: none; padding: 10px; border-radius: 5px; color: white; cursor: pointer;">Excluir</button>
                 </div>
             </div>`;
     });
@@ -164,7 +161,7 @@ async function salvarEdicao(id) {
     const { error } = await supabaseClient.from('treinos').update({
         exercicio: document.getElementById(`edit-nome-${id}`).value,
         series: parseInt(document.getElementById(`edit-ser-${id}`).value),
-        reps: parseInt(document.getElementById(`edit-rep-${id}`).value),
+        reps: document.getElementById(`edit-rep-${id}`).value,
         descanso: parseInt(document.getElementById(`edit-des-${id}`).value),
         letra_treino: document.getElementById(`edit-letra-${id}`).value,
         grupo: document.getElementById(`edit-grupo-${id}`).value,
@@ -180,8 +177,7 @@ async function excluirExercicio(id) {
     }
 }
 
-// 4. FUNÇÕES DO ALUNO (TIMER, CARGA, ETC)
-// [Mantenha as funções carregarDadosAluno, carregarTreinos, iniciarDescanso, salvarCarga e toggleVideo que já funcionavam]
+// 4. FUNÇÕES DO ALUNO
 async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return window.location.href = 'index.html';
@@ -205,56 +201,21 @@ async function carregarTreinos(alunoId) {
     const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).eq('letra_treino', treinoSelecionado);
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
-    container.innerHTML += `
-    <div class="card-treino">
-        <div class="card-content">
-            <div class="info">
-                <h3 style="color:${cor}">${item.exercicio}</h3>
-                <span>${item.series}x${item.reps} - ${item.grupo}</span>
-                <div style="margin-top:8px; display:flex; gap:5px;">
-                    <input type="text" class="input-carga" placeholder="Carga" value="${item.carga || ''}">
-                    <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
+    
+    container.innerHTML = ""; // Limpa a lista antes de carregar
+    
+    treinos?.forEach(item => {
+        const cor = coresGrupos[item.grupo] || '#ffcc00';
+        container.innerHTML += `
+        <div class="card-treino">
+            <div class="card-content">
+                <div class="info">
+                    <h3 style="color:${cor}">${item.exercicio}</h3>
+                    <span>${item.series}x${item.reps} - ${item.grupo}</span>
+                    <div style="margin-top:8px; display:flex; gap:5px;">
+                        <input type="text" class="input-carga" placeholder="Carga" value="${item.carga || ''}">
+                        <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
+                    </div>
+                    <button onclick="iniciarDescanso(${item.descanso || 60})" class="btn-timer">⏱️ Descanso ${item.descanso || 60}s</button>
                 </div>
-                <button onclick="iniciarDescanso(${item.descanso || 60})" class="btn-timer">⏱️ Descanso ${item.descanso || 60}s</button>
-            </div>
-            <div class="acoes">
-                <span onclick="toggleCheck(this)" class="check-icon">✅</span>
-                ${item.video_url ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
-            </div>
-        </div>
-        <div class="video-dropdown">
-            <div class="video-container">
-                <iframe src=""></iframe>
-            </div>
-        </div>
-    </div>`;
-
-function iniciarDescanso(segundos) {
-    clearInterval(intervaloTimer);
-    let tempo = segundos;
-    const container = document.getElementById('cronometro-container');
-    const display = document.getElementById('cronometro-tempo');
-    container.classList.add('visible');
-    intervaloTimer = setInterval(() => {
-        const min = Math.floor(tempo / 60); const seg = tempo % 60;
-        display.innerText = `${min.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
-        if (tempo <= 0) { clearInterval(intervaloTimer); document.getElementById('alarme-audio').play(); display.innerText = "TREINE!"; setTimeout(() => container.classList.remove('visible'), 5000); }
-        tempo--;
-    }, 1000);
-}
-
-function toggleCheck(el) { el.style.opacity = el.style.opacity === "0.3" ? "1" : "0.3"; }
-async function salvarCarga(id, btn) {
-    const carga = btn.closest('.info').querySelector('.input-carga').value;
-    await supabaseClient.from('treinos').update({ carga }).eq('id', id);
-    btn.innerText = "OK!"; setTimeout(() => btn.innerText = "SALVAR", 2000);
-}
-function toggleVideo(btn, url) {
-    const gaveta = btn.closest('.card-treino').querySelector('.video-dropdown');
-    const iframe = gaveta.querySelector('iframe');
-    if (gaveta.classList.contains('open')) { gaveta.classList.remove('open'); iframe.src = ""; btn.innerText = "VÍDEO ▾"; }
-    else { let id = url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("youtu.be/")[1]; iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`; gaveta.classList.add('open'); btn.innerText = "FECHAR ▴"; }
-}
-async function logout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
-function pararCronometro() { clearInterval(intervaloTimer); document.getElementById('cronometro-container').classList.remove('visible'); }
-async function trocarFotoPerfil() { const l = prompt("Link da foto:"); if(l) { const { data:{user} } = await supabaseClient.auth.getUser(); await supabaseClient.from('perfis').update({foto_url:l}).eq('id',user.id); document.getElementById('img-aluno').src=l; } }
+                <div class="acoes">
