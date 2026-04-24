@@ -12,6 +12,28 @@ const coresGrupos = {
 };
 
 // 2. FUNÇÕES ALUNO
+async function cadastrarNovoAluno() {
+    const nome = document.getElementById('novoNome').value;
+    const email = document.getElementById('novoEmail').value;
+    const password = document.getElementById('novaSenha').value;
+    const foto_url = document.getElementById('novoFoto').value; // NOVO
+    const frase = document.getElementById('novoFrase').value;     // NOVO
+
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) return alert(error.message);
+
+    if (data.user) {
+        await supabaseClient.from('perfis').insert([{ 
+            id: data.user.id, 
+            nome, 
+            role: 'usuario',
+            foto_url: foto_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', // Foto padrão se vazio
+            frase: frase || 'Bons treinos!' 
+        }]);
+        alert("Aluno Cadastrado com Sucesso!");
+    }
+}
+
 async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return window.location.href = 'index.html';
