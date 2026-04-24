@@ -142,7 +142,10 @@ async function carregarTreinos(alunoId) {
         .select('*')
         .eq('aluno_id', alunoId)
         .eq('letra_treino', treinoSelecionado); // Filtra pela aba A, B ou C
-
+// ... dentro do card-treino no carregarTreinos
+<button onclick="iniciarDescanso(${item.descanso})" class="btn-timer">
+    ⏱️ Descansar ${item.descanso}s
+</button>
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
 
