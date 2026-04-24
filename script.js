@@ -63,32 +63,34 @@ async function verificarPermissao(userId) {
 // 3. FUNÇÕES DO ADMINISTRADOR (CADASTRO E PRESCRIÇÃO)
 async function cadastrarNovoAluno() {
     const nome = document.getElementById('novoNome').value;
-    const email = document.getElementById('novoEmail').value;
+    const nick = document.getElementById('novoNick').value.trim().toLowerCase(); // Nickname limpo
     const password = document.getElementById('novaSenha').value;
-    const foto_url = document.getElementById('novoFoto') ? document.getElementById('novoFoto').value : '';
-    const frase = document.getElementById('novoFrase') ? document.getElementById('novoFrase').value : '';
+    const foto_url = document.getElementById('novoFoto').value;
+    const frase = document.getElementById('novoFrase').value;
 
-    if (!nome || !email || !password) return alert("Nome, E-mail e Senha são obrigatórios.");
+    if (!nome || !nick || !password) return alert("Preencha Nome, Nickname e Senha!");
 
-    // Criar usuário no Supabase Auth
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    
+    // Criamos um e-mail fictício usando o nickname
+    const emailFicticio = `${nick}@academia.com`;
+
+    const { data, error } = await supabaseClient.auth.signUp({ 
+        email: emailFicticio, 
+        password 
+    });
+
     if (error) return alert("Erro ao criar conta: " + error.message);
 
     if (data.user) {
-        // Criar perfil na tabela 'perfis'
-        const { error: perfilError } = await supabaseClient.from('perfis').insert([{ 
+        await supabaseClient.from('perfis').insert([{ 
             id: data.user.id, 
             nome: nome, 
+            nickname: nick, // Salva o nick na nova coluna
             role: 'usuario',
             foto_url: foto_url || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
             frase: frase || 'Foco na missão!'
         }]);
-
-        if (perfilError) return alert("Erro ao salvar perfil: " + perfilError.message);
-        
-        alert("Aluno " + nome + " cadastrado com sucesso!");
-        carregarAlunos(); // Atualiza a lista de seleção
+        alert(`Aluno ${nick} cadastrado com sucesso!`);
+        carregarAlunos();
     }
 }
 
