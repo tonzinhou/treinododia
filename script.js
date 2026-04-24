@@ -133,8 +133,8 @@ async function buscarTreinosParaEdicao() {
                         <option value="A" ${t.letra_treino === 'A' ? 'selected' : ''}>Treino A</option>
                         <option value="B" ${t.letra_treino === 'B' ? 'selected' : ''}>Treino B</option>
                         <option value="C" ${t.letra_treino === 'C' ? 'selected' : ''}>Treino C</option>
-                        <option value="C" ${t.letra_treino === 'D' ? 'selected' : ''}>Treino D</option>
-                        <option value="C" ${t.letra_treino === 'E' ? 'selected' : ''}>Treino E</option>
+                        <option value="D" ${t.letra_treino === 'D' ? 'selected' : ''}>Treino D</option>
+                        <option value="E" ${t.letra_treino === 'E' ? 'selected' : ''}>Treino E</option>
                     </select>
                     <select id="edit-grupo-${t.id}">
                         <option value="Peito" ${t.grupo === 'Peito' ? 'selected' : ''}>Peito</option>
