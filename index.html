@@ -15,16 +15,22 @@
         </div>
 
         <div class="login-box">
-            <h2 id="login-title">Acesso Aluno</h2>
-            <p id="login-desc">Digite seus dados para ver seu treino.</p>
+            <div class="login-header">
+                <h2 id="login-title">Acesso Aluno</h2>
+                <p id="login-desc">Digite seus dados para ver seu treino.</p>
+            </div>
             
-            <div class="inputs">
-                <input type="email" id="email" placeholder="E-mail">
-                <input type="password" id="password" placeholder="Senha">
+            <div class="inputs" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="email" placeholder="Seu e-mail">
+                <input type="password" id="password" placeholder="Sua senha">
             </div>
 
-            <button class="btn-principal" onclick="fazerLogin()">Entrar</button>
+            <button class="btn-principal" onclick="fazerLogin()" style="margin-top: 20px;">
+                ENTRAR NO SISTEMA
+            </button>
         </div>
+        
+        <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">Desenvolvido para sua melhor performance.</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
