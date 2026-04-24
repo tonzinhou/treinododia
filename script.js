@@ -146,24 +146,33 @@ async function carregarTreinos(alunoId) {
             const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00'; // Usa a cor do grupo ou dourado
             
             container.innerHTML += `
-                <div class="card-treino">
-                    <div class="card-content">
-                        <div class="info">
-                            <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
-                            <span style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">${item.grupo}</span><br>
-                            <span>${item.series} x ${item.reps}</span>
-                        </div>
-                        <div class="acoes">
-                            ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
-                            <span style="margin-left:10px; cursor:pointer;">✅</span>
-                        </div>
-                    </div>
-                    <div class="video-dropdown">
-                        <div class="video-container">
-                            <iframe src="" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>`;
+    <div class="card-treino">
+        <div class="card-content">
+            <div class="info">
+                <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
+                <span style="font-size: 0.7rem; text-transform: uppercase;">${item.grupo}</span><br>
+                <span>${item.series} x ${item.reps}</span>
+                
+                <div class="controle-carga" style="margin-top: 10px; display: flex; gap: 5px; align-items: center;">
+                    <input type="text" class="input-carga" placeholder="Peso" value="${item.carga || ''}" 
+                           style="width: 70px; padding: 5px; font-size: 0.8rem; background: #000; border: 1px solid #444;">
+                    <button onclick="salvarCarga('${item.id}', this)" 
+                            style="font-size: 0.7rem; padding: 5px 10px; background: #333; color: #ffcc00; border: 1px solid #ffcc00; border-radius: 4px; cursor: pointer;">
+                        SALVAR
+                    </button>
+                </div>
+            </div>
+            <div class="acoes">
+                ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
+                <span style="margin-left:10px; cursor:pointer;" onclick="this.innerText = this.innerText === '✅' ? '⬜' : '✅'">✅</span>
+            </div>
+        </div>
+        <div class="video-dropdown">
+            <div class="video-container">
+                <iframe src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>`;
         });
     } else {
         container.innerHTML = `<p class='msg-vazio'>Nenhum exercício para o Treino ${treinoSelecionado}.</p>`;
