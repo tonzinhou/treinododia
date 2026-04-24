@@ -232,3 +232,97 @@ async function salvarCarga(exercicioId, botao) {
         setTimeout(() => { botao.innerText = "SALVAR"; }, 2000);
     }
 }
+// ... (mantenha o topo do arquivo igual)
+
+async function carregarTreinos(alunoId) {
+    const { data: treinos } = await supabaseClient
+        .from('treinos')
+        .select('*')
+        .eq('aluno_id', alunoId)
+        .eq('letra_treino', treinoSelecionado);
+
+    const container = document.getElementById('lista-exercicios');
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (treinos && treinos.length > 0) {
+        treinos.forEach(item => {
+            const temVideo = item.video_url && item.video_url.includes("youtu");
+            const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00';
+            
+            container.innerHTML += `
+                <div class="card-treino">
+                    <div class="card-content">
+                        <div class="info">
+                            <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
+                            <span style="font-size: 0.7rem; text-transform: uppercase;">${item.grupo}</span><br>
+                            <span>${item.series} x ${item.reps}</span>
+                            
+                            <div class="controle-carga" style="margin-top: 10px; display: flex; gap: 5px;">
+                                <input type="text" class="input-carga" placeholder="Peso" value="${item.carga || ''}" 
+                                       style="width: 70px; padding: 5px; font-size: 0.8rem; background: #000; border: 1px solid #444; color: #ffcc00;">
+                                <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
+                            </div>
+
+                            <button onclick="iniciarDescanso(60)" class="btn-timer">⏱️ Descansar 60s</button>
+                        </div>
+                        <div class="acoes">
+                            ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
+                            <span class="check-icon" onclick="toggleCheck(this)">✅</span>
+                        </div>
+                    </div>
+                    <div class="video-dropdown">
+                        <div class="video-container">
+                            <iframe src="" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    } else {
+        container.innerHTML = `<p class='msg-vazio'>Nenhum exercício para o Treino ${treinoSelecionado}.</p>`;
+    }
+}
+
+// --- NOVAS FUNÇÕES DO CRONÔMETRO ---
+let intervaloTimer;
+function iniciarDescanso(segundos) {
+    clearInterval(intervaloTimer);
+    let tempo = segundos;
+    const display = document.getElementById('cronometro-tempo');
+    const container = document.getElementById('cronometro-container');
+    
+    container.classList.add('visible');
+
+    intervaloTimer = setInterval(() => {
+        const min = Math.floor(tempo / 60);
+        const seg = tempo % 60;
+        display.innerText = `${min.toString().padStart(2, '0')}:${seg.toString().padStart(2, '0')}`;
+        
+        if (tempo <= 0) {
+            clearInterval(intervaloTimer);
+            document.getElementById('alarme-audio').play();
+            display.innerText = "TREINE!";
+            setTimeout(() => { container.classList.remove('visible'); }, 4000);
+        }
+        tempo--;
+    }, 1000);
+}
+
+function pararCronometro() {
+    clearInterval(intervaloTimer);
+    document.getElementById('cronometro-container').classList.remove('visible');
+}
+
+async function salvarCarga(exercicioId, botao) {
+    const card = botao.closest('.card-treino');
+    const valorCarga = card.querySelector('.input-carga').value;
+    const { error } = await supabaseClient.from('treinos').update({ carga: valorCarga }).eq('id', exercicioId);
+    if (!error) {
+        botao.innerText = "OK!";
+        setTimeout(() => { botao.innerText = "SALVAR"; }, 2000);
+    }
+}
+
+function toggleCheck(el) {
+    el.style.opacity = el.style.opacity === "0.3" ? "1" : "0.3";
+}
