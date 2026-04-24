@@ -15,12 +15,20 @@ body {
 .header-aluno { display: flex; justify-content: space-between; margin-bottom: 25px; }
 .perfil-info { display: flex; align-items: center; gap: 15px; }
 .foto-perfil img {
-    width: 65px; height: 65px; border-radius: 50%;
-    border: 2px solid #ffcc00; object-fit: cover;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 3px solid #ffcc00;
+    object-fit: cover;
+    /* Efeito de brilho suave */
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
 }
-.texto-boas-vindas h2 { margin: 0; font-size: 1.3rem; }
-.frase-motivacional { font-size: 0.75rem; color: #888; font-style: italic; margin-top: 5px; }
 
+.texto-boas-vindas h2 {
+    color: #ffcc00; /* Nome em dourado para destaque */
+    font-size: 1.4rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
 /* 3. CRONÔMETRO INLINE */
 .cronometro-inline {
     display: none;
