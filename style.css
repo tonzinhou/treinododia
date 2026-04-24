@@ -226,3 +226,15 @@ select {
         max-height: 100vh; /* Permite que o vídeo ocupe a altura total da tela */
     }
 }
+
+/* controle de carga */
+.controle-carga input {
+    height: 30px;
+    text-align: center;
+    color: #ffcc00;
+    font-weight: bold;
+}
+
+.controle-carga button:active {
+    transform: scale(0.9);
+}
