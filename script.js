@@ -91,9 +91,10 @@ async function atribuirTreino() {
         exercicio: document.getElementById('exNome').value,
         series: parseInt(document.getElementById('exSeries').value),
         reps: parseInt(document.getElementById('exReps').value),
+        descanso: parseInt(document.getElementById('exDescanso').value) || 60, // CAPTURA O TEMPO
         video_url: document.getElementById('exVideo').value,
-        letra_treino: document.getElementById('exLetra').value, // NOVO
-        grupo: document.getElementById('exGrupo').value          // NOVO
+        letra_treino: document.getElementById('exLetra').value,
+        grupo: document.getElementById('exGrupo').value
     }]);
     if (error) alert(error.message); else alert("Treino salvo!");
 }
