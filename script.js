@@ -4,19 +4,20 @@ const SUPABASE_KEY = 'sb_publishable_r-__wMRaOzmh1AGM-tSkbQ_Kp5HkQUx';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let abaAtual = 'usuario';
-let treinoSelecionado = 'A'; // Padrão inicial para o aluno
+let treinoSelecionado = 'A';
+let intervaloTimer;
 
 // 2. MAPEAMENTO DE CORES POR GRUPO MUSCULAR
 const coresGrupos = {
-    'Peito': '#ff4444',    // Vermelho
-    'Costas': '#44ff44',   // Verde
-    'Pernas': '#4444ff',   // Azul
-    'Ombros': '#ff8800',   // Laranja
-    'Braços': '#ff44ff',   // Rosa/Roxo
-    'Core': '#00ffff'      // Ciano
+    'Peito': '#ff4444',
+    'Costas': '#44ff44',
+    'Pernas': '#4444ff',
+    'Ombros': '#ff8800',
+    'Braços': '#ff44ff',
+    'Core': '#00ffff'
 };
 
-// 3. CONTROLE DE ABAS (LOGIN)
+// 3. CONTROLE DE ACESSO E LOGIN
 window.switchTab = function(tipo) {
     abaAtual = tipo;
     const btnAluno = document.getElementById('tab-aluno');
@@ -39,7 +40,6 @@ window.switchTab = function(tipo) {
     }
 };
 
-// 4. LOGIN E PERMISSÕES
 async function fazerLogin() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -60,7 +60,7 @@ async function verificarPermissao(userId) {
     }
 }
 
-// 5. FUNÇÕES DO ADMIN (CADASTRO E PRESCRIÇÃO)
+// 4. FUNÇÕES DO ADMINISTRADOR
 async function cadastrarNovoAluno() {
     const nome = document.getElementById('novoNome').value;
     const email = document.getElementById('novoEmail').value;
@@ -91,7 +91,7 @@ async function atribuirTreino() {
         exercicio: document.getElementById('exNome').value,
         series: parseInt(document.getElementById('exSeries').value),
         reps: parseInt(document.getElementById('exReps').value),
-        descanso: parseInt(document.getElementById('exDescanso').value) || 60, // CAPTURA O TEMPO
+        descanso: parseInt(document.getElementById('exDescanso').value) || 60,
         video_url: document.getElementById('exVideo').value,
         letra_treino: document.getElementById('exLetra').value,
         grupo: document.getElementById('exGrupo').value
@@ -99,21 +99,15 @@ async function atribuirTreino() {
     if (error) alert(error.message); else alert("Treino salvo!");
 }
 
-// 6. FUNÇÕES DO ALUNO (FILTROS E EXIBIÇÃO)
-
-// Função para o aluno trocar entre Treino A, B ou C
+// 5. FUNÇÕES DO ALUNO
 window.filtrarTreino = function(letra) {
     treinoSelecionado = letra;
-    console.log("Mudando para o treino:", letra);
-
-    // 1. Atualiza o visual dos botões
     document.querySelectorAll('.filtro-treinos button').forEach(btn => {
-        btn.classList.remove('active'); // Remove a cor amarela de todos
+        btn.classList.remove('active');
         btn.style.background = '#252525';
         btn.style.color = 'white';
     });
 
-    // 2. Destaca o botão clicado
     const btnAtivo = document.getElementById(`btn-treino-${letra}`);
     if (btnAtivo) {
         btnAtivo.classList.add('active');
@@ -121,7 +115,6 @@ window.filtrarTreino = function(letra) {
         btnAtivo.style.color = 'black';
     }
 
-    // 3. Recarrega os dados do banco
     supabaseClient.auth.getUser().then(({data}) => {
         if (data.user) carregarTreinos(data.user.id);
     });
@@ -132,64 +125,66 @@ async function carregarDadosAluno() {
     if (!user) return window.location.href = 'index.html';
     const { data } = await supabaseClient.from('perfis').select('nome').eq('id', user.id).single();
     if (data) document.getElementById('nome-aluno').innerText = data.nome;
-    
     carregarTreinos(user.id);
 }
 
 async function carregarTreinos(alunoId) {
-    const { data: treinos, error } = await supabaseClient
+    const { data: treinos } = await supabaseClient
         .from('treinos')
         .select('*')
         .eq('aluno_id', alunoId)
-        .eq('letra_treino', treinoSelecionado); // Filtra pela aba A, B ou C
-// ... dentro do card-treino no carregarTreinos
-<button onclick="iniciarDescanso(${item.descanso})" class="btn-timer">
-    ⏱️ Descansar ${item.descanso}s
-</button>
+        .eq('letra_treino', treinoSelecionado);
+
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
+    container.innerHTML = "";
 
     if (treinos && treinos.length > 0) {
-        container.innerHTML = "";
         treinos.forEach(item => {
             const temVideo = item.video_url && item.video_url.includes("youtu");
-            const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00'; // Usa a cor do grupo ou dourado
+            const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00';
+            const tempoDescanso = item.descanso || 60;
             
             container.innerHTML += `
-    <div class="card-treino">
-        <div class="card-content">
-            <div class="info">
-                <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
-                <span style="font-size: 0.7rem; text-transform: uppercase;">${item.grupo}</span><br>
-                <span>${item.series} x ${item.reps}</span>
-                
-                <div class="controle-carga" style="margin-top: 10px; display: flex; gap: 5px; align-items: center;">
-                    <input type="text" class="input-carga" placeholder="Peso" value="${item.carga || ''}" 
-                           style="width: 70px; padding: 5px; font-size: 0.8rem; background: #000; border: 1px solid #444;">
-                    <button onclick="salvarCarga('${item.id}', this)" 
-                            style="font-size: 0.7rem; padding: 5px 10px; background: #333; color: #ffcc00; border: 1px solid #ffcc00; border-radius: 4px; cursor: pointer;">
-                        SALVAR
-                    </button>
-                </div>
-            </div>
-            <div class="acoes">
-                ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
-                <span style="margin-left:10px; cursor:pointer;" onclick="this.innerText = this.innerText === '✅' ? '⬜' : '✅'">✅</span>
-            </div>
-        </div>
-        <div class="video-dropdown">
-            <div class="video-container">
-                <iframe src="" frameborder="0" allowfullscreen></iframe>
-            </div>
-        </div>
-    </div>`;
+                <div class="card-treino">
+                    <div class="card-content">
+                        <div class="info">
+                            <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
+                            <span style="font-size: 0.7rem; text-transform: uppercase;">${item.grupo}</span><br>
+                            <span>${item.series} x ${item.reps}</span>
+                            
+                            <div class="controle-carga" style="margin-top: 10px; display: flex; gap: 5px;">
+                                <input type="text" class="input-carga" placeholder="Peso" value="${item.carga || ''}" 
+                                       style="width: 70px; padding: 5px; font-size: 0.8rem; background: #000; border: 1px solid #444; color: #ffcc00;">
+                                <button onclick="salvarCarga('${item.id}', this)" 
+                                        style="font-size: 0.7rem; padding: 5px 10px; background: #333; color: #ffcc00; border: 1px solid #ffcc00; border-radius: 4px; cursor: pointer;">
+                                    SALVAR
+                                </button>
+                            </div>
+
+                            <button onclick="iniciarDescanso(${tempoDescanso})" 
+                                    style="margin-top: 10px; background: #252525; color: #ffcc00; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                ⏱️ Descansar ${tempoDescanso}s
+                            </button>
+                        </div>
+                        <div class="acoes">
+                            ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
+                            <span style="margin-left:10px; cursor:pointer; font-size: 1.5rem;" onclick="toggleCheck(this)">✅</span>
+                        </div>
+                    </div>
+                    <div class="video-dropdown">
+                        <div class="video-container">
+                            <iframe src="" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>`;
         });
     } else {
         container.innerHTML = `<p class='msg-vazio'>Nenhum exercício para o Treino ${treinoSelecionado}.</p>`;
     }
 }
 
-// 7. LÓGICA DE ABRIR/FECHAR VÍDEO
+// 6. UTILITÁRIOS (VÍDEO, CARGA, TIMER)
 function toggleVideo(botao, url) {
     const card = botao.closest('.card-treino');
     const gaveta = card.querySelector('.video-dropdown');
@@ -214,81 +209,16 @@ function toggleVideo(botao, url) {
     }
 }
 
-// 8* controle de carga
-async function logout() {
-    await supabaseClient.auth.signOut();
-    window.location.href = 'index.html';
-}
 async function salvarCarga(exercicioId, botao) {
     const card = botao.closest('.card-treino');
     const valorCarga = card.querySelector('.input-carga').value;
-
-    const { error } = await supabaseClient
-        .from('treinos')
-        .update({ carga: valorCarga })
-        .eq('id', exercicioId);
-
-    if (error) {
-        alert("Erro ao salvar carga: " + error.message);
-    } else {
-        // Efeito visual de sucesso
-        botao.innerText = "✅";
+    const { error } = await supabaseClient.from('treinos').update({ carga: valorCarga }).eq('id', exercicioId);
+    if (!error) {
+        botao.innerText = "OK!";
         setTimeout(() => { botao.innerText = "SALVAR"; }, 2000);
     }
 }
-// ... (mantenha o topo do arquivo igual)
 
-async function carregarTreinos(alunoId) {
-    const { data: treinos } = await supabaseClient
-        .from('treinos')
-        .select('*')
-        .eq('aluno_id', alunoId)
-        .eq('letra_treino', treinoSelecionado);
-
-    const container = document.getElementById('lista-exercicios');
-    if (!container) return;
-    container.innerHTML = "";
-
-    if (treinos && treinos.length > 0) {
-        treinos.forEach(item => {
-            const temVideo = item.video_url && item.video_url.includes("youtu");
-            const corDoExercicio = coresGrupos[item.grupo] || '#ffcc00';
-            
-            container.innerHTML += `
-                <div class="card-treino">
-                    <div class="card-content">
-                        <div class="info">
-                            <h3 style="color: ${corDoExercicio}">${item.exercicio}</h3>
-                            <span style="font-size: 0.7rem; text-transform: uppercase;">${item.grupo}</span><br>
-                            <span>${item.series} x ${item.reps}</span>
-                            
-                            <div class="controle-carga" style="margin-top: 10px; display: flex; gap: 5px;">
-                                <input type="text" class="input-carga" placeholder="Peso" value="${item.carga || ''}" 
-                                       style="width: 70px; padding: 5px; font-size: 0.8rem; background: #000; border: 1px solid #444; color: #ffcc00;">
-                                <button onclick="salvarCarga('${item.id}', this)" class="btn-acao-mini">SALVAR</button>
-                            </div>
-
-                            <button onclick="iniciarDescanso(60)" class="btn-timer">⏱️ Descansar 60s</button>
-                        </div>
-                        <div class="acoes">
-                            ${temVideo ? `<button onclick="toggleVideo(this, '${item.video_url}')" class="btn-video">VÍDEO ▾</button>` : ''}
-                            <span class="check-icon" onclick="toggleCheck(this)">✅</span>
-                        </div>
-                    </div>
-                    <div class="video-dropdown">
-                        <div class="video-container">
-                            <iframe src="" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>`;
-        });
-    } else {
-        container.innerHTML = `<p class='msg-vazio'>Nenhum exercício para o Treino ${treinoSelecionado}.</p>`;
-    }
-}
-
-// --- NOVAS FUNÇÕES DO CRONÔMETRO ---
-let intervaloTimer;
 function iniciarDescanso(segundos) {
     clearInterval(intervaloTimer);
     let tempo = segundos;
@@ -317,16 +247,11 @@ function pararCronometro() {
     document.getElementById('cronometro-container').classList.remove('visible');
 }
 
-async function salvarCarga(exercicioId, botao) {
-    const card = botao.closest('.card-treino');
-    const valorCarga = card.querySelector('.input-carga').value;
-    const { error } = await supabaseClient.from('treinos').update({ carga: valorCarga }).eq('id', exercicioId);
-    if (!error) {
-        botao.innerText = "OK!";
-        setTimeout(() => { botao.innerText = "SALVAR"; }, 2000);
-    }
-}
-
 function toggleCheck(el) {
     el.style.opacity = el.style.opacity === "0.3" ? "1" : "0.3";
+}
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
 }
