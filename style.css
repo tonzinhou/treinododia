@@ -278,3 +278,36 @@ input, select {
     color: #666;
     margin-top: 40px;
 }
+
+/* AJUSTES PARA A LISTA DE EDIÇÃO NO ADMIN */
+#lista-edicao-treinos select {
+    background: #121212;
+    border: 1px solid #444;
+    padding: 8px;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    color: #ffcc00;
+}
+
+#lista-edicao-treinos label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+#lista-edicao-treinos input {
+    background: #121212;
+    border: 1px solid #444;
+    padding: 10px;
+}
+
+/* Deixa os botões de Salvar/Excluir mais robustos na edição */
+#lista-edicao-treinos button {
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s;
+}
+
+#lista-edicao-treinos button:hover {
+    opacity: 0.8;
+}
