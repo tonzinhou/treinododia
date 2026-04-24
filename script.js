@@ -38,8 +38,26 @@ async function carregarDadosAluno() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return window.location.href = 'index.html';
     
-    const { data } = await supabaseClient.from('perfis').select('nome').eq('id', user.id).single();
-    if (data) document.getElementById('nome-aluno').innerText = data.nome;
+    // Buscamos nome, foto e frase
+    const { data } = await supabaseClient
+        .from('perfis')
+        .select('nome, foto_url, frase')
+        .eq('id', user.id)
+        .single();
+
+    if (data) {
+        document.getElementById('nome-aluno').innerText = data.nome;
+        
+        // Atualiza a frase motivacional
+        const fraseEl = document.querySelector('.frase-motivacional');
+        if (fraseEl) fraseEl.innerText = `"${data.frase}"`;
+        
+        // Atualiza a foto de perfil
+        const imgEl = document.getElementById('img-aluno');
+        if (imgEl && data.foto_url) {
+            imgEl.src = data.foto_url;
+        }
+    }
     
     carregarTreinos(user.id);
 }
