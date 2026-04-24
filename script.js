@@ -330,3 +330,25 @@ async function salvarEdicao(id) {
         buscarTreinosParaEdicao(); // Recarrega a lista para confirmar
     }
 }
+
+// Função para o aluno trocar a própria foto
+async function trocarFotoPerfil() {
+    const novoLink = prompt("Cole aqui o link da nova foto de perfil (URL):");
+    
+    if (novoLink && novoLink.trim() !== "") {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        const { error } = await supabaseClient
+            .from('perfis')
+            .update({ foto_url: novoLink })
+            .eq('id', user.id);
+
+        if (error) {
+            alert("Erro ao atualizar foto: " + error.message);
+        } else {
+            // Atualiza a imagem na tela imediatamente
+            document.getElementById('img-aluno').src = novoLink;
+            alert("Foto atualizada com sucesso!");
+        }
+    }
+}
