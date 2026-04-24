@@ -253,53 +253,80 @@ window.switchAdminTab = function(idAba, btn) {
     if(idAba === 'aba-prescrever' || idAba === 'aba-editar') carregarAlunos();
 };
 
-// Buscar treinos para editar
+// Buscar treinos para editar (Versão Completa)
 async function buscarTreinosParaEdicao() {
     const alunoId = document.getElementById('selectAlunosEdicao').value;
     const container = document.getElementById('lista-edicao-treinos');
-    if(!alunoId) return;
+    if(!alunoId) return container.innerHTML = "";
 
-    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).order('letra_treino');
+    const { data: treinos } = await supabaseClient
+        .from('treinos')
+        .select('*')
+        .eq('aluno_id', alunoId)
+        .order('letra_treino');
     
     container.innerHTML = "";
-    treinos.forEach(t => {
+    treinos?.forEach(t => {
         container.innerHTML += `
-            <div style="background: #252525; padding: 15px; border-radius: 8px; border-left: 4px solid #ffcc00;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                    <small>Treino: ${t.letra_treino}</small> <small>Grupo: ${t.grupo}</small>
+            <div style="background: #252525; padding: 15px; border-radius: 8px; border-left: 4px solid #ffcc00; margin-bottom: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size: 0.7rem; color: #888;">Treino:</label>
+                        <select id="edit-letra-${t.id}">
+                            <option value="A" ${t.letra_treino === 'A' ? 'selected' : ''}>Treino A</option>
+                            <option value="B" ${t.letra_treino === 'B' ? 'selected' : ''}>Treino B</option>
+                            <option value="C" ${t.letra_treino === 'C' ? 'selected' : ''}>Treino C</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; color: #888;">Grupo:</label>
+                        <select id="edit-grupo-${t.id}">
+                            <option value="Peito" ${t.grupo === 'Peito' ? 'selected' : ''}>Peito</option>
+                            <option value="Costas" ${t.grupo === 'Costas' ? 'selected' : ''}>Costas</option>
+                            <option value="Pernas" ${t.grupo === 'Pernas' ? 'selected' : ''}>Pernas</option>
+                            <option value="Ombros" ${t.grupo === 'Ombros' ? 'selected' : ''}>Ombros</option>
+                            <option value="Braços" ${t.grupo === 'Braços' ? 'selected' : ''}>Braços</option>
+                            <option value="Core" ${t.grupo === 'Core' ? 'selected' : ''}>Core</option>
+                        </select>
+                    </div>
                 </div>
-                <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}" style="margin-bottom: 5px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
-                    <input type="number" value="${t.series}" id="edit-ser-${t.id}">
-                    <input type="number" value="${t.reps}" id="edit-rep-${t.id}">
-                    <input type="number" value="${t.descanso}" id="edit-des-${t.id}">
+
+                <label style="font-size: 0.7rem; color: #888;">Exercício:</label>
+                <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}" style="margin-bottom: 10px;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                    <input type="number" value="${t.series}" id="edit-ser-${t.id}" title="Séries">
+                    <input type="number" value="${t.reps}" id="edit-rep-${t.id}" title="Reps">
+                    <input type="number" value="${t.des}" id="edit-des-${t.id}" title="Descanso">
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="salvarEdicao('${t.id}')" style="flex: 2; background: #2ecc71; border: none; padding: 8px; border-radius: 5px; color: white; cursor: pointer;">Salvar</button>
-                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; border: none; padding: 8px; border-radius: 5px; color: white; cursor: pointer;">Excluir</button>
+
+                <label style="font-size: 0.7rem; color: #888;">Link do Vídeo:</label>
+                <input type="text" value="${t.video_url || ''}" id="edit-video-${t.id}" placeholder="Link do YouTube">
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="salvarEdicao('${t.id}')" style="flex: 2; background: #2ecc71; border: none; padding: 10px; border-radius: 5px; color: white; cursor: pointer; font-weight: bold;">SALVAR ALTERAÇÕES</button>
+                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; border: none; padding: 10px; border-radius: 5px; color: white; cursor: pointer; font-weight: bold;">EXCLUIR</button>
                 </div>
-            </div>
-        `;
+            </div>`;
     });
 }
 
-// Salvar as alterações feitas
+// Salvar todas as alterações (Versão Completa)
 async function salvarEdicao(id) {
     const { error } = await supabaseClient.from('treinos').update({
         exercicio: document.getElementById(`edit-nome-${id}`).value,
         series: parseInt(document.getElementById(`edit-ser-${id}`).value),
         reps: parseInt(document.getElementById(`edit-rep-${id}`).value),
-        descanso: parseInt(document.getElementById(`edit-des-${id}`).value)
+        descanso: parseInt(document.getElementById(`edit-des-${id}`).value),
+        letra_treino: document.getElementById(`edit-letra-${id}`).value,
+        grupo: document.getElementById(`edit-grupo-${id}`).value,
+        video_url: document.getElementById(`edit-video-${id}`).value
     }).eq('id', id);
 
-    if (error) alert("Erro ao atualizar!");
-    else alert("Alterado com sucesso!");
-}
-
-// Excluir um exercício
-async function excluirExercicio(id) {
-    if(confirm("Deseja apagar este exercício?")) {
-        const { error } = await supabaseClient.from('treinos').delete().eq('id', id);
-        if(!error) buscarTreinosParaEdicao();
+    if (error) {
+        alert("Erro ao atualizar: " + error.message);
+    } else {
+        alert("Treino atualizado com sucesso!");
+        buscarTreinosParaEdicao(); // Recarrega a lista para confirmar
     }
 }
