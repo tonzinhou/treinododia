@@ -236,3 +236,66 @@ function toggleCheck(el) {
 }
 
 async function logout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+// Alternar abas no Admin
+window.switchAdminTab = function(idAba, btn) {
+    document.getElementById('aba-usuarios').style.display = 'none';
+    document.getElementById('aba-prescrever').style.display = 'none';
+    document.getElementById('aba-editar').style.display = 'none';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(idAba).style.display = 'block';
+    btn.classList.add('active');
+
+    if(idAba === 'aba-prescrever' || idAba === 'aba-editar') carregarAlunos();
+};
+
+// Buscar treinos para editar
+async function buscarTreinosParaEdicao() {
+    const alunoId = document.getElementById('selectAlunosEdicao').value;
+    const container = document.getElementById('lista-edicao-treinos');
+    if(!alunoId) return;
+
+    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).order('letra_treino');
+    
+    container.innerHTML = "";
+    treinos.forEach(t => {
+        container.innerHTML += `
+            <div style="background: #252525; padding: 15px; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                    <small>Treino: ${t.letra_treino}</small> <small>Grupo: ${t.grupo}</small>
+                </div>
+                <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}" style="margin-bottom: 5px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px;">
+                    <input type="number" value="${t.series}" id="edit-ser-${t.id}">
+                    <input type="number" value="${t.reps}" id="edit-rep-${t.id}">
+                    <input type="number" value="${t.descanso}" id="edit-des-${t.id}">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="salvarEdicao('${t.id}')" style="flex: 2; background: #2ecc71; border: none; padding: 8px; border-radius: 5px; color: white; cursor: pointer;">Salvar</button>
+                    <button onclick="excluirExercicio('${t.id}')" style="flex: 1; background: #ff4444; border: none; padding: 8px; border-radius: 5px; color: white; cursor: pointer;">Excluir</button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+// Salvar as alterações feitas
+async function salvarEdicao(id) {
+    const { error } = await supabaseClient.from('treinos').update({
+        exercicio: document.getElementById(`edit-nome-${id}`).value,
+        series: parseInt(document.getElementById(`edit-ser-${id}`).value),
+        reps: parseInt(document.getElementById(`edit-rep-${id}`).value),
+        descanso: parseInt(document.getElementById(`edit-des-${id}`).value)
+    }).eq('id', id);
+
+    if (error) alert("Erro ao atualizar!");
+    else alert("Alterado com sucesso!");
+}
+
+// Excluir um exercício
+async function excluirExercicio(id) {
+    if(confirm("Deseja apagar este exercício?")) {
+        const { error } = await supabaseClient.from('treinos').delete().eq('id', id);
+        if(!error) buscarTreinosParaEdicao();
+    }
+}
