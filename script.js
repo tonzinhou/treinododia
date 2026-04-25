@@ -133,6 +133,8 @@ async function carregarAlunos() {
 
 async function atribuirTreino() {
     const aluno_id = document.getElementById('selectAlunos').value;
+    const ordemVal = document.getElementById('exOrdem').value; // Pega o valor da ordem
+
     if (!aluno_id) return alert("Selecione um aluno!");
 
     const { error } = await supabaseClient.from('treinos').insert([{ 
@@ -143,9 +145,17 @@ async function atribuirTreino() {
         descanso: parseInt(document.getElementById('exDescanso').value) || 60,
         video_url: document.getElementById('exVideo').value,
         letra_treino: document.getElementById('exLetra').value,
-        grupo: document.getElementById('exGrupo').value
+        grupo: document.getElementById('exGrupo').value,
+        ordem: parseInt(ordemVal) || 0 // Salva a ordem (se estiver vazio, vira 0)
     }]);
-    if (error) alert(error.message); else alert("Adicionado!");
+
+    if (error) {
+        alert("Erro: " + error.message);
+    } else {
+        alert("Exercício adicionado na posição " + (ordemVal || "0") + "!");
+        // Limpa o campo de nome para facilitar a próxima inserção
+        document.getElementById('exNome').value = "";
+    }
 }
 
 async function buscarTreinosParaEdicao() {
