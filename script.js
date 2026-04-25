@@ -152,8 +152,17 @@ async function buscarTreinosParaEdicao() {
     const alunoId = document.getElementById('selectAlunosEdicao').value;
     const container = document.getElementById('lista-edicao-treinos');
     if(!alunoId) return container.innerHTML = "";
-
-    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).order('letra_treino');
+<div style="margin-bottom: 10px;">
+    <label style="font-size: 0.7rem; color: #888;">Posição/Ordem:</label>
+    <input type="number" value="${t.ordem || 0}" id="edit-ordem-${t.id}" style="width: 60px;">
+</div>
+    // Adicione o .order no final das suas consultas
+const { data: treinos } = await supabaseClient
+    .from('treinos')
+    .select('*')
+    .eq('aluno_id', alunoId)
+    .order('letra_treino', { ascending: true }) // Primeiro organiza por A, B, C
+    .order('ordem', { ascending: true });      // Depois pela ordem 1, 2, 3...
     
     container.innerHTML = "";
     treinos?.forEach(t => {
@@ -199,9 +208,14 @@ async function salvarEdicao(id) {
         descanso: parseInt(document.getElementById(`edit-des-${id}`).value),
         letra_treino: document.getElementById(`edit-letra-${id}`).value,
         grupo: document.getElementById(`edit-grupo-${id}`).value,
-        video_url: document.getElementById(`edit-video-${id}`).value
+        video_url: document.getElementById(`edit-video-${id}`).value,
+        ordem: parseInt(document.getElementById(`edit-ordem-${id}`).value) // Nova linha
     }).eq('id', id);
-    if (error) alert("Erro!"); else alert("Atualizado!");
+
+    if (error) alert("Erro!"); else {
+        alert("Atualizado!");
+        buscarTreinosParaEdicao(); // Recarrega para mostrar na ordem certa
+    }
 }
 
 async function excluirExercicio(id) {
@@ -236,7 +250,13 @@ window.filtrarTreino = function(letra) {
 };
 
 async function carregarTreinos(alunoId) {
-    const { data: treinos } = await supabaseClient.from('treinos').select('*').eq('aluno_id', alunoId).eq('letra_treino', treinoSelecionado);
+    // Adicione o .order no final das suas consultas
+const { data: treinos } = await supabaseClient
+    .from('treinos')
+    .select('*')
+    .eq('aluno_id', alunoId)
+    .order('letra_treino', { ascending: true }) // Primeiro organiza por A, B, C
+    .order('ordem', { ascending: true });      // Depois pela ordem 1, 2, 3...
     const container = document.getElementById('lista-exercicios');
     if (!container) return;
     
