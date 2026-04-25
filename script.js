@@ -106,11 +106,17 @@ async function cadastrarNovoAluno() {
 
 async function carregarAlunos() {
     const { data } = await supabaseClient.from('perfis').select('id, nome').neq('role', 'admin');
-    const s1 = document.getElementById('selectAlunos');
-    const s2 = document.getElementById('selectAlunosEdicao');
-    const opt = '<option value="">Selecione o Aluno</option>' + (data ? data.map(a => `<option value="${a.id}">${a.nome}</option>`).join('') : '');
-    if (s1) s1.innerHTML = opt;
-    if (s2) s2.innerHTML = opt;
+    
+    // IDs de todos os selects de alunos que temos no Admin
+    const idsSelects = ['selectAlunos', 'selectAlunosEdicao', 'selectOrigem', 'selectDestino'];
+    
+    const options = '<option value="">Selecione o Aluno</option>' + 
+                    (data ? data.map(a => `<option value="${a.id}">${a.nome}</option>`).join('') : '');
+    
+    idsSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = options;
+    });
 }
 
 async function atribuirTreino() {
