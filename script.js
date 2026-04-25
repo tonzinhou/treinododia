@@ -105,18 +105,30 @@ async function cadastrarNovoAluno() {
 }
 
 async function carregarAlunos() {
+    // 1. Busca os alunos no banco
     const { data } = await supabaseClient.from('perfis').select('id, nome').neq('role', 'admin');
     
-    // IDs de todos os selects de alunos que temos no Admin
-    const idsSelects = ['selectAlunos', 'selectAlunosEdicao', 'selectOrigem', 'selectDestino'];
+    // 2. Lista de TODOS os IDs de selects que precisam ser preenchidos
+    const selectsParaPreencher = [
+        'selectAlunos',         // Aba Prescrever
+        'selectAlunosEdicao',   // Aba Editar
+        'selectOrigem',         // Aba Clonar (De)
+        'selectDestino'         // Aba Clonar (Para)
+    ];
     
-    const options = '<option value="">Selecione o Aluno</option>' + 
-                    (data ? data.map(a => `<option value="${a.id}">${a.nome}</option>`).join('') : '');
-    
-    idsSelects.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = options;
-    });
+    if (data) {
+        // Cria o texto das opções
+        const options = '<option value="">Selecione o Aluno</option>' + 
+                        data.map(a => `<option value="${a.id}">${a.nome}</option>`).join('');
+        
+        // 3. Loop para preencher cada seletor que existir na tela
+        selectsParaPreencher.forEach(id => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.innerHTML = options;
+            }
+        });
+    }
 }
 
 async function atribuirTreino() {
