@@ -37,6 +37,20 @@
                 <label>1. Selecionar Aluno:</label>
                 <select id="selectAlunos"><option value="">Carregando alunos...</option></select>
 
+                <div class="admin-card" style="margin-top: 20px; border-top: 2px solid #ffcc00;">
+    <h3>👯 Clonar Treino Completo</h3>
+    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Copia todos os exercícios de um aluno para outro.</p>
+    
+    <label>Copiar DE (Origem):</label>
+    <select id="selectOrigem"><option value="">Selecione o Aluno</option></select>
+
+    <label style="margin-top: 10px; display: block;">Copiar PARA (Destino):</label>
+    <select id="selectDestino"><option value="">Selecione o Aluno</option></select>
+
+    <button class="btn-principal" style="background: #3498db; margin-top: 15px;" onclick="clonarTreinoCompleto()">
+        Confirmar Clonagem
+    </button>
+</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
                         <label>2. Treino:</label>
