@@ -324,3 +324,44 @@ async function trocarFotoPerfil() {
         document.getElementById('img-aluno').src=l; 
     } 
 }
+
+async function clonarTreinoCompleto() {
+    const origemId = document.getElementById('selectOrigem').value;
+    const destinoId = document.getElementById('selectDestino').value;
+
+    if (!origemId || !destinoId) return alert("Selecione os dois alunos!");
+    if (origemId === destinoId) return alert("O aluno de origem e destino não podem ser o mesmo.");
+
+    if (confirm("Isso copiará TODOS os exercícios. O aluno de destino já pode ter treinos salvos. Continuar?")) {
+        
+        // 1. Busca todos os treinos do aluno de origem
+        const { data: treinosOrigem, error: errorBusca } = await supabaseClient
+            .from('treinos')
+            .select('*')
+            .eq('aluno_id', origemId);
+
+        if (errorBusca) return alert("Erro ao buscar treinos: " + errorBusca.message);
+        if (!treinosOrigem || treinosOrigem.length === 0) return alert("O aluno de origem não tem treinos para copiar.");
+
+        // 2. Prepara os dados para inserção (remove o ID antigo e troca o aluno_id)
+        const novosTreinos = treinosOrigem.map(t => {
+            const { id, ...dadosSemId } = t; // Remove o ID único do exercício original
+            return {
+                ...dadosSemId,
+                aluno_id: destinoId, // Atribui ao novo aluno
+                carga: "" // Opcional: limpa as cargas para o novo aluno começar do zero
+            };
+        });
+
+        // 3. Insere no banco de dados
+        const { error: errorInsercao } = await supabaseClient
+            .from('treinos')
+            .insert(novosTreinos);
+
+        if (errorInsercao) {
+            alert("Erro ao clonar: " + errorInsercao.message);
+        } else {
+            alert(`Sucesso! ${treinosOrigem.length} exercícios copiados.`);
+        }
+    }
+}
