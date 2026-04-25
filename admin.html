@@ -61,13 +61,14 @@
                     </div>
                 </div>
 
-                <label>4. Detalhes:</label>
-                <input type="text" id="exNome" placeholder="Nome do Exercício">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                    <input type="number" id="exSeries" placeholder="Séries">
-                    <input type="text" id="exReps" placeholder="Reps">
-                    <input type="number" id="exDescanso" placeholder="Desc. (s)">
-                </div>
+                <label>4. Detalhes e Sequência:</label>
+<input type="text" id="exNome" placeholder="Nome do Exercício">
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+    <input type="number" id="exSeries" placeholder="Séries">
+    <input type="number" id="exReps" placeholder="Reps">
+    <input type="number" id="exDescanso" placeholder="Desc. (s)">
+    <input type="number" id="exOrdem" placeholder="Ordem" title="Ex: 1 para o primeiro, 2 para o segundo">
+</div>
                 
                 <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube)">
                 <button class="btn-principal" style="background: #2ecc71; color: white;" onclick="atribuirTreino()">Salvar Exercício</button>
