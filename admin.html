@@ -37,7 +37,7 @@
                 <label>1. Selecionar Aluno:</label>
                 <select id="selectAlunos"><option value="">Carregando alunos...</option></select>
 
-               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div>
                         <label>2. Treino:</label>
                         <select id="exLetra">
@@ -62,40 +62,44 @@
                 </div>
 
                 <label>4. Detalhes e Sequência:</label>
-<input type="text" id="exNome" placeholder="Nome do Exercício">
-<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
-    <input type="number" id="exSeries" placeholder="Séries">
-    <input type="number" id="exReps" placeholder="Reps">
-    <input type="number" id="exDescanso" placeholder="Desc. (s)">
-    <input type="number" id="exOrdem" placeholder="Ordem" title="Ex: 1 para o primeiro, 2 para o segundo">
-</div>
+                <input type="text" id="exNome" placeholder="Nome do Exercício">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                    <input type="number" id="exSeries" placeholder="Séries">
+                    <input type="number" id="exReps" placeholder="Reps">
+                    <input type="number" id="exDescanso" placeholder="Desc. (s)">
+                    <input type="number" id="exOrdem" placeholder="Ordem" title="Ex: 1 para o primeiro, 2 para o segundo">
+                </div>
                 
-                <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube)">
+                <input type="text" id="exVideo" placeholder="Link do vídeo (YouTube ou Shorts)">
                 <button class="btn-principal" style="background: #2ecc71; color: white;" onclick="atribuirTreino()">Salvar Exercício</button>
             </div>
 
-             <div class="admin-card" style="margin-top: 20px; border-top: 2px solid #ffcc00;">
-    <h3>👯 Clonar Treino Completo</h3>
-    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">Copia todos os exercícios de um aluno para outro.</p>
-    
-    <label>Copiar DE (Origem):</label>
-    <select id="selectOrigem"><option value="">Selecione o Aluno</option></select>
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #444;">
+                <h3 style="color: #3498db;">👯 Clonar Treino Completo</h3>
+                <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Copia toda a ficha de um aluno para outro de forma instantânea.</p>
+                
+                <div class="form-group" style="display: flex; flex-direction: column; gap: 10px;">
+                    <label>Copiar DE (Origem):</label>
+                    <select id="selectOrigem"><option value="">Selecione o Aluno</option></select>
 
-    <label style="margin-top: 10px; display: block;">Copiar PARA (Destino):</label>
-    <select id="selectDestino"><option value="">Selecione o Aluno</option></select>
+                    <label style="margin-top: 5px;">Copiar PARA (Destino):</label>
+                    <select id="selectDestino"><option value="">Selecione o Aluno</option></select>
 
-    <button class="btn-principal" style="background: #3498db; margin-top: 15px;" onclick="clonarTreinoCompleto()">
-        Confirmar Clonagem
-    </button>
-</div>
+                    <button class="btn-principal" style="background: #3498db; margin-top: 10px;" onclick="clonarTreinoCompleto()">
+                        Confirmar Clonagem
+                    </button>
+                </div>
+            </div>
         </section>
 
         <section id="aba-editar" class="admin-card" style="display: none;">
             <h3>✏️ Editar / Excluir</h3>
-            <label>Selecione o Aluno para carregar os treinos:</label>
-            <select id="selectAlunosEdicao" onchange="buscarTreinosParaEdicao()">
-                <option value="">Selecione o Aluno</option>
-            </select>
+            <div class="form-group">
+                <label>Selecione o Aluno para carregar os treinos:</label>
+                <select id="selectAlunosEdicao" onchange="buscarTreinosParaEdicao()">
+                    <option value="">Selecione o Aluno</option>
+                </select>
+            </div>
             
             <div id="lista-edicao-treinos" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
                 </div>
@@ -105,17 +109,23 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
     <script>
+        // Carrega a lista de alunos assim que a página abre
         window.onload = function() {
-            carregarAlunos();
+            if (typeof carregarAlunos === "function") carregarAlunos();
         };
 
+        // Lógica de navegação entre as seções do painel
         function switchAdminTab(idAba, btn) {
             document.getElementById('aba-usuarios').style.display = 'none';
             document.getElementById('aba-prescrever').style.display = 'none';
             document.getElementById('aba-editar').style.display = 'none';
+            
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
             document.getElementById(idAba).style.display = 'block';
             btn.classList.add('active');
+
+            // Sempre atualiza as listas de alunos ao trocar de aba para garantir dados novos
             if (typeof carregarAlunos === "function") carregarAlunos();
         }
     </script>
