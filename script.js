@@ -320,7 +320,28 @@ function iniciarDescanso(segundos) {
     }, 1000);
 }
 
-function toggleCheck(el) { el.style.opacity = el.style.opacity === "0.3" ? "1" : "0.3"; }
+function toggleCheck(el) {
+    const card = el.closest('.card-treino');
+    const container = document.getElementById('lista-exercicios');
+
+    // Verifica se já está marcado (usando uma classe CSS para controle)
+    if (card.classList.contains('feito')) {
+        // Desmarcar
+        card.classList.remove('feito');
+        el.style.opacity = "1";
+        // Opcional: Se quiser que ele volte para a ordem original ao desmarcar, 
+        // seria necessário recarregar a lista, mas por simplicidade, apenas tiramos o efeito.
+    } else {
+        // Marcar como feito
+        card.classList.add('feito');
+        el.style.opacity = "0.3";
+        
+        // Move para o final da lista com um pequeno atraso para o aluno ver o efeito
+        setTimeout(() => {
+            container.appendChild(card);
+        }, 300);
+    }
+}
 
 async function salvarCarga(id, btn) {
     const carga = btn.closest('.info').querySelector('.input-carga').value;
