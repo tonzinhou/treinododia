@@ -336,3 +336,22 @@ input, select {
     align-items: center;
     font-size: 12px;
 }
+/* Efeito quando o exercício é marcado como feito */
+.card-treino.feito {
+    opacity: 0.4; /* Deixa transparente */
+    filter: grayscale(0.8); /* Deixa levemente acinzentado */
+    order: 999; /* Garante que vá para o fim se usar flexbox no container */
+    transition: all 0.5s ease; /* Transição suave ao mover */
+    border-left: 4px solid #2ecc71 !important; /* Muda a borda para verde */
+}
+
+.card-treino.feito h3 {
+    text-decoration: line-through; /* Risca o nome do exercício */
+}
+
+/* Ajuste no container para suportar a reordenação visual */
+#lista-exercicios {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
