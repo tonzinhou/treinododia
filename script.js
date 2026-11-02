@@ -171,6 +171,7 @@ async function buscarTreinosParaEdicao() {
                         <option value="Ombros" ${t.grupo === 'Ombros' ? 'selected' : ''}>Ombros</option>
                         <option value="Braços" ${t.grupo === 'Braços' ? 'selected' : ''}>Braços</option>
                         <option value="Core" ${t.grupo === 'Core' ? 'selected' : ''}>Core</option>
+                        <option value="Glúteos" ${t.grupo === 'Glúteos' ? 'selected' : ''}>Glúteos</option>
                     </select>
                 </div>
                 <input type="text" value="${t.exercicio}" id="edit-nome-${t.id}">
