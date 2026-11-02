@@ -34,7 +34,7 @@ let intervaloTimer;
 
 const coresGrupos = {
     'Peito': '#ff4444', 'Costas': '#44ff44', 'Pernas': '#4444ff',
-    'Ombros': '#ff8800', 'Braços': '#ff44ff', 'Core': '#00ffff'
+    'Ombros': '#ff8800', 'Braços': '#ff44ff', 'Core': '#00ffff', 'Glúteos': '#ff0000'
 };
 
 // ==========================================
